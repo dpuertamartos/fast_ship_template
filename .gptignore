@@ -1,0 +1,13 @@
+README.md
+.gitignore
+LICENSE
+vite.config.js
+eslint.config.js
+package.json
+package-lock.json
+index.html
+frontend/public
+frontend/src/assets
+frontend/src/App.css
+frontend/src/index.css
+frontend/node_modules
