@@ -6,8 +6,8 @@ import MenuIcon from '@mui/icons-material/Menu'
 import HomeIcon from '@mui/icons-material/Home'
 import Footer from './components/common/Footer'
 import noteService from './services/notes'
-import loginService from './services/login'
-import LoginForm from './components/LoginForm'
+import LoginForm from './components/common/LoginForm'
+import Notification from './components/Notification'
 import Contact from './views/Contact'
 import PrivacyPolicy from './views/PrivacyPolicy'
 import Home from './views/Home'
@@ -17,15 +17,12 @@ import ShareMenu from './components/common/ShareMenu'
 
 const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [loginVisible, setLoginVisible] = useState(false)
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   
-
   const theme = useTheme()
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'))
   const location = useLocation()
@@ -35,58 +32,13 @@ const App = () => {
   }, [location])
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedNoteappUser')
+    const loggedUserJSON = window.localStorage.getItem('loggedAppUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       setUser(user)
       noteService.setToken(user.token)
     }
   }, [])
-
-  const handleLogin = async (event) => {
-    event.preventDefault()
-
-    try {
-      const user = await loginService.login({
-        username, password,
-      })
-      window.localStorage.setItem(
-        'loggedNoteappUser', JSON.stringify(user)
-      )
-      noteService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
-    } catch (exception) {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
-    }
-  }
-
-  const loginForm = () => {
-    const hideWhenVisible = { display: loginVisible ? 'none' : '' }
-    const showWhenVisible = { display: loginVisible ? '' : 'none' }
-
-    return (
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>log in</button>
-        </div>
-        <div style={showWhenVisible}>
-          <LoginForm
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            handleSubmit={handleLogin}
-          />
-          <button onClick={() => setLoginVisible(false)}>cancel</button>
-        </div>
-      </div>
-    )
-  }
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen)
@@ -122,7 +74,9 @@ const App = () => {
       <CssBaseline />
       <AppBar position="fixed" sx={appBarStyle}>
         <Toolbar sx={{ justifyContent: 'flex-end', gap: 4 }}>
+
           <ShareMenu />
+
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <IconButton color={location.pathname === '/' ? 'primary' : 'inherit'} component={Link} to="/">
               <HomeIcon />
@@ -157,15 +111,19 @@ const App = () => {
         </Toolbar>
       </AppBar>
       <Toolbar />
-
-
+      
+      <Box>
+        <Notification message={errorMessage} />
+        {!user && <LoginForm loginVisible={loginVisible} setLoginVisible={setLoginVisible} setUser={setUser} setErrorMessage={setErrorMessage}/>}
+        {user && <p>{user.name} logged in</p>}
+      </Box>    
 
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
 {/*           <Route path="/explora/:id" element={<FlatDetailed />} />
           <Route path="/explora" element={<Explora errorMessage={errorMessage} drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} />} />
            */}
-          <Route path="/notes" element={<Notes />} /> 
+          <Route path="/notes" element={<Notes user={user} setErrorMessage={setErrorMessage}/>} /> 
           <Route path="/contact" element={<Contact drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} />} />
           <Route path="/privacy_policy" element={<PrivacyPolicy />} /> 
           <Route path="/" element={<Home />} />
