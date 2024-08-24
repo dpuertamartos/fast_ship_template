@@ -2,7 +2,8 @@ README.md
 .gitignore
 LICENSE
 vite.config.js
-eslint.config.js
+.eslintrc.cjs
+.eslintignore
 package.json
 package-lock.json
 index.html
