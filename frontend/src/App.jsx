@@ -1,12 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useLocation } from "react-router-dom"
-import { AppBar, Toolbar, Button, CssBaseline, IconButton, useTheme, useMediaQuery, Box, Menu, MenuItem } from '@mui/material'
-import { EmailShareButton, FacebookShareButton, TwitterShareButton, LinkedinShareButton, WhatsappShareButton, EmailIcon, FacebookIcon, TwitterIcon, LinkedinIcon, WhatsappIcon } from 'react-share'
+import { AppBar, Toolbar, Button, CssBaseline, IconButton, useTheme, useMediaQuery, Box } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Tune'
 import MenuIcon from '@mui/icons-material/Menu'
 import HomeIcon from '@mui/icons-material/Home'
-import ShareIcon from '@mui/icons-material/Share'
-import Notification from './components/Notification'
 import Footer from './components/common/Footer'
 import noteService from './services/notes'
 import loginService from './services/login'
@@ -16,6 +13,7 @@ import PrivacyPolicy from './views/PrivacyPolicy'
 import Home from './views/Home'
 import Notes from './views/Notes'
 import SmallScreenNavMenu from './components/common/DrawerSmallScreenNavigation'
+import ShareMenu from './components/common/ShareMenu'
 
 const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
@@ -26,7 +24,7 @@ const App = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState(null)
+  
 
   const theme = useTheme()
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'))
@@ -98,27 +96,6 @@ const App = () => {
     setMenuOpen(!menuOpen)
   }
 
-  const handleShareClick = (event) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleClose = () => {
-    setAnchorEl(null)
-  }
-
-  const handleNativeShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'BuscaHogar',
-        text: 'Échale un ojo a este buscador de inmuebles, con tasación automática!',
-        url: 'https://www.buscahogar.es',
-      }).catch((error) => console.log('Error sharing', error))
-    } else {
-      alert('Your browser does not support the native share functionality.')
-    }
-    handleClose()
-  }
-
   const appBarStyle = {
     backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white
     color: theme.palette.text.primary,
@@ -145,50 +122,7 @@ const App = () => {
       <CssBaseline />
       <AppBar position="fixed" sx={appBarStyle}>
         <Toolbar sx={{ justifyContent: 'flex-end', gap: 4 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, marginRight: 'auto' }}>
-            <IconButton color="inherit" onClick={handleShareClick}>
-              <ShareIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleClose}
-            >
-              <MenuItem>
-                <FacebookShareButton url="https://www.buscahogar.es" hashtag="BuscaHogar">
-                  <FacebookIcon size={32} round />
-                </FacebookShareButton>
-              </MenuItem>
-              <MenuItem>
-                <TwitterShareButton url="https://www.buscahogar.es" title="Échale un ojo a este buscador de inmuebles, con tasación automática!">
-                  <TwitterIcon size={32} round />
-                </TwitterShareButton>
-              </MenuItem>
-              <MenuItem>
-                <LinkedinShareButton url="https://www.buscahogar.es" title="Échale un ojo a este buscador de inmuebles, con tasación automática!">
-                  <LinkedinIcon size={32} round />
-                </LinkedinShareButton>
-              </MenuItem>
-              <MenuItem>
-                <WhatsappShareButton url="https://www.buscahogar.es" title="Échale un ojo a este buscador de inmuebles, con tasación automática!">
-                  <WhatsappIcon size={32} round />
-                </WhatsappShareButton>
-              </MenuItem>
-              <MenuItem>
-                <EmailShareButton
-                  subject="Te comparto buscahogar.es, un buscador de inmuebles"
-                  body={`https://www.buscahogar.es\n\nÉchale un ojo a este buscador de inmuebles, con tasación automática!`}
-                >
-                  <EmailIcon size={32} round />
-                </EmailShareButton>
-              </MenuItem>
-              {navigator.share && (
-                <MenuItem onClick={handleNativeShare}>
-                  <ShareIcon sx={{ marginRight: 1 }} /> Comparte a tus apps
-                </MenuItem>
-              )}
-            </Menu>
-          </Box>
+          <ShareMenu />
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <IconButton color={location.pathname === '/' ? 'primary' : 'inherit'} component={Link} to="/">
               <HomeIcon />
