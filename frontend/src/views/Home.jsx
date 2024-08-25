@@ -76,7 +76,7 @@ const Home = () => {
       return
     }
 
-/*     try {
+    /*     try {
       const response = await emailService.addEmail({ email })
       setMessage('Email subscrito con éxito!')
       setEmail('')
@@ -98,7 +98,7 @@ const Home = () => {
       <Box
         sx={{
           position: 'relative',
-          backgroundImage: 'url("/1_big.jpg")',
+          backgroundImage: 'url("/hero_image_1.jpg")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           height: '100vh',
@@ -115,52 +115,51 @@ const Home = () => {
       >
         <HeroOverlay />
         <Typography variant="h2" sx={{ mb: 4, zIndex: 1 }} gutterBottom>
-          Encuentra tu hogar soñado
+          Main message
         </Typography>
         <Typography variant="h5" sx={{ mb: 4, zIndex: 1 }}>
-          Descubre inmuebles interesantes gracias a nuestro algoritmo de aprendizaje automático
+          Secondary message
         </Typography>
         <motion.div initial={{ opacity: 1, scale: 0.6 }} animate={{ opacity: 1, scale: 1.2 }} transition={{ duration: 1.5, delay: 0.5 }}>
           <StyledButton size="large" variant="contained" color="primary" sx={{ mt: 3, mb: 2, zIndex: 1 }} component={Link} to="/explora">
-            Empieza tu búsqueda
+            CTA button
           </StyledButton>
         </motion.div>
         <motion.div initial={{ opacity: 1, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.5, delay: 1 }}>
           <StyledButton size="large" variant="outlined" sx={{ m: 2, borderColor: '#fff', color: '#fff', zIndex: 1 }} component={Link} to="/valora">
-            Valora
+            CTA button 2
           </StyledButton>
         </motion.div>
       </Box>
 
-      <FadeInSection ref={section1Ref} inView={section1InView}>  
-      <Container>
-        <Box sx={{ flexGrow: 1, py: isLargeScreen ? 0 : '4%', px: isLargeScreen ? 8 : 4, mb: '10%', backgroundColor: 'background.default' }}>
-          <Grid container spacing={isLargeScreen ? 10 : 2} alignItems="center">
-            <Grid item xs={12} md={6}>
+      <FadeInSection ref={section1Ref} inView={section1InView}>
+        <Container>
+          <Box sx={{ flexGrow: 1, py: isLargeScreen ? 0 : '4%', px: isLargeScreen ? 8 : 4, mb: '10%', backgroundColor: 'background.default' }}>
+            <Grid container spacing={isLargeScreen ? 10 : 2} alignItems="center">
+              <Grid item xs={12} md={6}>
                 <Typography variant="h4" component="div" color="primary.main" gutterBottom>
-                  Flujo de datos actualizado
+                  Lorem ipsum dolor sit amet
                 </Typography>
                 <Typography variant="h6" color="text.primary" textAlign="justify">
-                  Hemos desarrollado un flujo de datos desde uno de los mayores portales inmobiliarios de España, lo que permite ofrecer una perspectiva innovadora en tendencias de inmuebles, precios y oportunidades de compra.
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                 </Typography>
                 <StyledButton size="large" variant="outlined" color="primary" sx={{ mt: 5, mb: 2, justifyContent: 'center' }} component={Link} to="/contact">
-                  Más info
+                  CTA
                 </StyledButton>
-            </Grid>
-            <Grid item xs={12} md={6}>
+              </Grid>
+              <Grid item xs={12} md={6}>
                 <Typography variant="h4" component="div" color="primary.main" gutterBottom>
-                  Aprendizaje Automático
+                  Lorem ipsum dolor sit amet
                 </Typography>
                 <Typography variant="h6" color="text.primary" textAlign="justify">
-                  Los datos permiten el entrenamiento de nuestros modelos de aprendizaje automático, que enriquecen el descubrimiento de tu próximo hogar mediante la asignación de un valor y puntuación a cada inmueble.
-                </Typography>
+                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.                </Typography>
                 <StyledButton size="large" variant="outlined" color="primary" sx={{ mt: 5, mb: 2, justifyContent: 'center' }} component={Link} to="/valora">
-                  Valora inmuebles
+                  CTA
                 </StyledButton>
+              </Grid>
             </Grid>
-          </Grid>
-        </Box>
-      </Container>
+          </Box>
+        </Container>
       </FadeInSection>
 
       <SectionDivider />
@@ -170,13 +169,13 @@ const Home = () => {
           <GradientBackground>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h4" color="inherit" gutterBottom sx={{ fontWeight: 700 }}>
-                ¿Estás listo para encontrar tu próximo hogar?
+                Lorem ipsum dolor sit amet
               </Typography>
               <Typography variant="h6" color="inherit" sx={{ mb: 4 }}>
-                Explora las mejores opciones inmobiliarias con la ayuda de nuestro sistema de recomendación.
+                Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet Lorem ipsum dolor sit amet
               </Typography>
               <StyledButton size="large" variant="contained" color="secondary" component={Link} to="/explora">
-                Comienza Ahora
+                CTA
               </StyledButton>
             </Box>
           </GradientBackground>
