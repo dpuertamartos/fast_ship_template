@@ -13,7 +13,7 @@ import SmallScreenNavMenu from './components/common/DrawerSmallScreenNavigation'
 import TopMenu from './components/common/AppBar'
 
 const App = () => {
-  const [errorMessage, setErrorMessage] = useState('Probando')
+  const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
   const [loginVisible, setLoginVisible] = useState(false)
 
