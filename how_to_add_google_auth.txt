@@ -1,0 +1,521 @@
+Implementing Google login in your application involves both backend and frontend changes. The process is relatively straightforward if you follow best practices and use established libraries. Here’s a step-by-step guide to adding Google login to your application in a clean, maintainable way:
+
+Step 1: Set Up Google API Credentials
+Create a Google Developer Project:
+
+Go to the Google Developer Console.
+Create a new project.
+Configure OAuth Consent Screen:
+
+Go to the "OAuth consent screen" tab.
+Configure the required fields (like Application name, Support email, etc.).
+Create OAuth 2.0 Credentials:
+
+Go to the "Credentials" tab.
+Click "Create Credentials" and choose "OAuth 2.0 Client IDs".
+Set the application type to "Web application".
+Add authorized redirect URIs. For development, it could be something like http://localhost:3000 (your frontend app's base URL) and http://localhost:3001/api/auth/google/callback (your backend API endpoint).
+Copy Your Client ID and Client Secret:
+
+You'll need these for both the frontend and backend configurations.
+Step 2: Backend Setup
+We'll use passport.js with the passport-google-oauth20 strategy to handle Google authentication in the backend.
+
+1. Install Required Packages
+bash
+Copy code
+npm install passport passport-google-oauth20 express-session
+2. Configure Environment Variables
+Add the following to your .env file:
+
+env
+Copy code
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback
+3. Configure Passport for Google Authentication
+Update your backend setup to include passport and passport-google-oauth20.
+
+Update app.js to include Passport setup:
+
+js
+Copy code
+const express = require('express')
+const session = require('express-session') // Add session middleware
+const passport = require('passport') // Add passport
+const GoogleStrategy = require('passport-google-oauth20').Strategy
+const config = require('./utils/config')
+const User = require('./models/user') // Import your User model
+
+const app = express()
+
+// Initialize session middleware
+app.use(session({
+  secret: config.SECRET,
+  resave: false,
+  saveUninitialized: true
+}))
+
+// Initialize passport
+app.use(passport.initialize())
+app.use(passport.session())
+
+passport.serializeUser((user, done) => {
+  done(null, user.id)
+})
+
+passport.deserializeUser((id, done) => {
+  User.findById(id).then(user => {
+    done(null, user)
+  })
+})
+
+// Configure Google Strategy
+passport.use(new GoogleStrategy({
+  clientID: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  callbackURL: process.env.GOOGLE_CALLBACK_URL
+},
+async (token, tokenSecret, profile, done) => {
+  try {
+    let user = await User.findOne({ googleId: profile.id })
+    if (!user) {
+      user = new User({
+        googleId: profile.id,
+        username: profile.displayName,
+        name: profile.name.givenName + ' ' + profile.name.familyName,
+        email: profile.emails[0].value,
+      })
+      await user.save()
+    }
+    return done(null, user)
+  } catch (error) {
+    return done(error, null)
+  }
+}))
+
+// Import routes and middleware as usual
+const notesRouter = require('./controllers/notes')
+const usersRouter = require('./controllers/users')
+const loginRouter = require('./controllers/login')
+
+// Setup routes
+app.use('/api/notes', notesRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/login', loginRouter)
+Add Google Auth Routes to a new file controllers/auth.js:
+
+js
+Copy code
+const express = require('express')
+const passport = require('passport')
+
+const authRouter = express.Router()
+
+authRouter.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
+
+authRouter.get('/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
+  // Successful authentication, redirect to frontend app
+  res.redirect('http://localhost:3000')
+})
+
+authRouter.get('/logout', (req, res) => {
+  req.logout(err => {
+    if (err) return next(err)
+    res.redirect('http://localhost:3000')
+  })
+})
+
+module.exports = authRouter
+Add the new route in app.js:
+
+js
+Copy code
+const authRouter = require('./controllers/auth') // Add this line
+
+app.use('/api/auth', authRouter) // Add this line
+Step 3: Frontend Setup
+Use the @react-oauth/google package to handle Google Login in the frontend.
+
+1. Install Required Packages
+bash
+Copy code
+npm install @react-oauth/google
+2. Setup Google Login in the Frontend
+Update App.jsx to include Google OAuth Provider:
+
+jsx
+Copy code
+import { GoogleOAuthProvider } from '@react-oauth/google' // Import GoogleOAuthProvider
+import { useState, useEffect } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
+import { CssBaseline, useTheme, useMediaQuery, Box, Modal } from '@mui/material'
+import Footer from './components/common/Footer'
+import noteService from './services/notes'
+import LoginForm from './components/common/LoginForm'
+import Notification from './components/common/Notification'
+import Contact from './views/Contact'
+import Profile from './views/Profile'
+import PrivacyPolicy from './views/PrivacyPolicy'
+import Home from './views/Home'
+import Notes from './views/Notes'
+import SmallScreenNavMenu from './components/common/DrawerSmallScreenNavigation'
+import TopMenu from './components/common/AppBar'
+
+const App = () => {
+  const [errorMessage, setErrorMessage] = useState(null)
+  const [user, setUser] = useState(null)
+  const [loginVisible, setLoginVisible] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+
+  const theme = useTheme()
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'))
+  const location = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [location])
+
+  useEffect(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedAppUser')
+    if (loggedUserJSON) {
+      const user = JSON.parse(loggedUserJSON)
+      setUser(user)
+      noteService.setToken(user.token)
+    }
+  }, [])
+
+  const handleDrawerToggle = () => {
+    setDrawerOpen(!drawerOpen)
+  }
+
+  const handleMenuToggle = () => {
+    setMenuOpen(!menuOpen)
+  }
+
+  const handleLoginOpen = () => {
+    setLoginVisible(true)
+  }
+
+  const handleLoginClose = () => {
+    setLoginVisible(false)
+  }
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedAppUser')
+    setUser(null)
+  }
+
+  const linkStyle = {
+    fontWeight: 600,
+    fontSize: '1rem',
+    fontFamily: theme.typography.fontFamily,
+    textDecoration: 'none',
+    color: 'inherit',
+    '&:hover': {
+      color: theme.palette.primary.main,
+    },
+    '&.active': {
+      color: theme.palette.primary.main,
+    },
+  }
+
+  return (
+    <GoogleOAuthProvider clientId="your-google-client-id">
+      <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+        <CssBaseline />
+        <TopMenu
+          location={location}
+          theme={theme}
+          linkStyle={linkStyle}
+          isLargeScreen={isLargeScreen}
+          handleDrawerToggle={handleDrawerToggle}
+          handleMenuToggle={handleMenuToggle}
+          user={user}
+          onLogin={handleLoginOpen}
+          onLogout={handleLogout}
+        />
+
+        <Modal open={loginVisible} onClose={handleLoginClose}>
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            outline: 'none',
+          }}>
+            <LoginForm setUser={setUser} closeModal={handleLoginClose} />
+          </Box>
+        </Modal>
+
+        <Notification message={errorMessage} />
+
+        <Box component="main" sx={{ flexGrow: 1 }}>
+          <Routes>
+            <Route path="/notes" element={<Notes user={user} setErrorMessage={setErrorMessage}/>} />
+            <Route path="/contact" element={<Contact drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} />} />
+            <Route path="/privacy_policy" element={<PrivacyPolicy />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/profile" element={<Profile user={user} onLogout={handleLogout} />} />
+          </Routes>
+        </Box>
+
+        <SmallScreenNavMenu linkStyle={linkStyle} location={location} theme={theme} menuOpen={menuOpen} handleMenuToggle={handleMenuToggle} user={user} onLogin={handleLoginOpen} onLogout={handleLogout}/>
+
+        <Footer />
+      </Box>
+    </GoogleOAuthProvider>
+  )
+}
+
+export default App
+Update LoginForm.jsx to Include Google Login Button:
+
+jsx
+Copy code
+import { useState } from 'react'
+import { TextField, Button, Typography, IconButton, Box } from '@mui/material'
+import { GoogleLogin } from '@react-oauth/google' // Import GoogleLogin
+import CloseIcon from '@mui/icons-material/Close'
+import loginService from '../../services/login'
+import noteService from '../../services/notes'
+import userService from '../../services/users'
+import Notification from './Notification'
+
+const LoginForm = ({ setUser, closeModal }) => {
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [message, setMessage] = useState({
+    type: 'success',
+    message: null
+  })
+
+  const handleLogin = async (credentials) => {
+    try {
+      const user = await loginService.login(credentials)
+      window.localStorage.setItem(
+        'loggedAppUser', JSON.stringify(user)
+      )
+      noteService.setToken(user.token)
+      setUser(user)
+      setUsername('')
+      setPassword('')
+      setMessage({
+        type: 'success',
+        message: 'Login success!'
+      })
+      setTimeout(() => {
+        setMessage({
+          type: 'success',
+          message: null
+        })
+        closeModal()
+      }, 2000)
+    } catch (exception) {
+      setMessage({
+        type: 'error',
+        message: 'Wrong credentials'
+      })
+      setTimeout(() => {
+        setMessage({
+          type: 'success',
+          message: null
+        })
+      }, 5000)
+    }
+  }
+
+  const handleRegister = async (event) => {
+    event.preventDefault()
+    try {
+      const newUser = await userService.register({
+        username,
+        password
+      })
+
+      setMessage({
+        type: 'success',
+        message: 'Registration successful.'
+      })
+      await handleLogin({ username, password })
+    } catch (exception) {
+      setMessage({
+        type: 'error',
+        message: 'Registration failed'
+      })
+      setTimeout(() => {
+        setMessage({
+          type: 'success',
+          message: null
+        })
+      }, 5000)
+    }
+  }
+
+  const handleGoogleLoginSuccess = async (response) => {
+    try {
+      const user = await loginService.googleLogin(response.credential) // Call your backend endpoint with the token
+      window.localStorage.setItem(
+        'loggedAppUser', JSON.stringify(user)
+      )
+      noteService.setToken(user.token)
+      setUser(user)
+      setMessage({
+        type: 'success',
+        message: 'Login success with Google!'
+      })
+      setTimeout(() => {
+        setMessage({
+          type: 'success',
+          message: null
+        })
+        closeModal()
+      }, 2000)
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        message: 'Google login failed'
+      })
+      setTimeout(() => {
+        setMessage({
+          type: 'success',
+          message: null
+        })
+      }, 5000)
+    }
+  }
+
+  return (
+    <Box sx={{ position: 'relative' }}>
+      <IconButton
+        aria-label="close"
+        onClick={closeModal}
+        sx={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          color: (theme) => theme.palette.grey[500],
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+      <Notification message={message.message} severity={message.type} />
+      <Typography variant="h5" sx={{ textAlign: 'center', mb: 2 }}>{isRegistering ? 'Register' : 'Login'}</Typography>
+      <form onSubmit={isRegistering ? handleRegister : (e) => { e.preventDefault(); handleLogin({ username, password }) }}>
+        <TextField
+          label="Username"
+          value={username}
+          onChange={({ target }) => setUsername(target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Password"
+          type="password"
+          value={password}
+          onChange={({ target }) => setPassword(target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+          {isRegistering ? 'Register' : 'Login'}
+        </Button>
+      </form>
+      <GoogleLogin
+        onSuccess={handleGoogleLoginSuccess}
+        onError={() => {
+          setMessage({
+            type: 'error',
+            message: 'Google Login failed'
+          })
+        }}
+      />
+      <Button
+        onClick={() => setIsRegistering(!isRegistering)}
+        color="primary"
+        fullWidth
+        sx={{ mt: 2, textTransform: 'none', fontWeight: 'bold' }}
+      >
+        {isRegistering ? 'Already have an account? Log in' : "Don't have an account? Register"}
+      </Button>
+    </Box>
+  )
+}
+
+export default LoginForm
+3. Backend Endpoint for Google Login
+Add a new route in controllers/login.js for Google login:
+
+js
+Copy code
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const loginRouter = require('express').Router()
+const User = require('../models/user')
+const { OAuth2Client } = require('google-auth-library') // Import Google OAuth2 client
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+loginRouter.post('/', async (request, response) => {
+  const { username, password } = request.body
+
+  const user = await User.findOne({ username })
+  const passwordCorrect = user === null
+    ? false
+    : await bcrypt.compare(password, user.passwordHash)
+
+  if (!(user && passwordCorrect)) {
+    return response.status(401).json({
+      error: 'invalid username or password'
+    })
+  }
+
+  const userForToken = {
+    username: user.username,
+    id: user._id,
+  }
+
+  const token = jwt.sign(userForToken, process.env.SECRET)
+
+  response
+    .status(200)
+    .send({ token, username: user.username, name: user.name })
+})
+
+loginRouter.post('/google', async (req, res) => {
+  const { tokenId } = req.body
+
+  try {
+    const ticket = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.GOOGLE_CLIENT_ID
+    })
+
+    const { sub: googleId, email, name } = ticket.getPayload()
+    let user = await User.findOne({ googleId })
+
+    if (!user) {
+      user = new User({ googleId, email, name })
+      await user.save()
+    }
+
+    const userForToken = {
+      username: user.username || user.email,
+      id: user._id,
+    }
+
+    const token = jwt.sign(userForToken, process.env.SECRET)
+
+    res.status(200).send({ token, username: user.username || user.email, name: user.name })
+  } catch (error) {
+    res.status(401).json({ error: 'Google login failed' })
+  }
+})
+
+module.exports = loginRouter
