@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
-import { CssBaseline, useTheme, useMediaQuery, Box } from '@mui/material'
+import { CssBaseline, useTheme, useMediaQuery, Box, Modal } from '@mui/material'
 import Footer from './components/common/Footer'
 import noteService from './services/notes'
 import LoginForm from './components/common/LoginForm'
-import Notification from './components/Notification'
+import Notification from './components/common/Notification'
 import Contact from './views/Contact'
+import Profile from './views/Profile'
 import PrivacyPolicy from './views/PrivacyPolicy'
 import Home from './views/Home'
 import Notes from './views/Notes'
@@ -16,7 +17,6 @@ const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [user, setUser] = useState(null)
   const [loginVisible, setLoginVisible] = useState(false)
-
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -25,7 +25,7 @@ const App = () => {
   const location = useLocation()
 
   useEffect(() => {
-    window.scrollTo(0, 0) // Scroll to the top of the window when the location changes
+    window.scrollTo(0, 0)
   }, [location])
 
   useEffect(() => {
@@ -45,6 +45,19 @@ const App = () => {
     setMenuOpen(!menuOpen)
   }
 
+  const handleLoginOpen = () => {
+    setLoginVisible(true)
+  }
+
+  const handleLoginClose = () => {
+    setLoginVisible(false)
+  }
+
+  const handleLogout = () => {
+    window.localStorage.removeItem('loggedAppUser')
+    setUser(null)
+  }
+
   const linkStyle = {
     fontWeight: 600,
     fontSize: '1rem',
@@ -62,28 +75,39 @@ const App = () => {
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <CssBaseline />
-      {/* This is the appbar in topside */}
-      <TopMenu location={location} theme={theme} linkStyle={linkStyle} isLargeScreen={isLargeScreen} handleDrawerToggle={handleDrawerToggle} handleMenuToggle={handleMenuToggle} />
+      <TopMenu
+        location={location}
+        theme={theme}
+        linkStyle={linkStyle}
+        isLargeScreen={isLargeScreen}
+        handleDrawerToggle={handleDrawerToggle}
+        handleMenuToggle={handleMenuToggle}
+        user={user}
+        onLogin={handleLoginOpen}
+        onLogout={handleLogout}
+      />
+
+      <Modal open={loginVisible} onClose={handleLoginClose}>
+        <Box sx={{ /* styles for modal positioning */ }}>
+          <LoginForm setUser={setUser} setErrorMessage={setErrorMessage} closeModal={handleLoginClose} />
+        </Box>
+      </Modal>
 
       <Box>
         <Notification message={errorMessage} />
-        {!user && <LoginForm loginVisible={loginVisible} setLoginVisible={setLoginVisible} setUser={setUser} setErrorMessage={setErrorMessage}/>}
-        {user && <p>{user.name} logged in</p>}
       </Box>
 
-      {/* This is the body of the application */}
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
           <Route path="/notes" element={<Notes user={user} setErrorMessage={setErrorMessage}/>} />
           <Route path="/contact" element={<Contact drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} />} />
           <Route path="/privacy_policy" element={<PrivacyPolicy />} />
           <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile user={user} onLogout={handleLogout} />} />
         </Routes>
-
       </Box>
 
-      {/* This is a Drawer for small screen navigation menu appearing as a drawer in left side */}
-      <SmallScreenNavMenu linkStyle={linkStyle} location={location} theme={theme} menuOpen={menuOpen} handleMenuToggle={handleMenuToggle} />
+      <SmallScreenNavMenu linkStyle={linkStyle} location={location} theme={theme} menuOpen={menuOpen} handleMenuToggle={handleMenuToggle} user={user} onLogin={handleLoginOpen} onLogout={handleLogout}/>
 
       <Footer />
     </Box>

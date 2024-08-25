@@ -2,12 +2,9 @@ import { useState } from 'react'
 import loginService from '../../services/login'
 import noteService from '../../services/notes'
 
-const LoginForm = ({ loginVisible, setLoginVisible, setUser, setErrorMessage }) => {
+const LoginForm = ({ setUser, setErrorMessage, closeModal }) => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-
-  const hideWhenVisible = { display: loginVisible ? 'none' : '' }
-  const showWhenVisible = { display: loginVisible ? '' : 'none' }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -23,6 +20,7 @@ const LoginForm = ({ loginVisible, setLoginVisible, setUser, setErrorMessage }) 
       setUser(user)
       setUsername('')
       setPassword('')
+      closeModal()
     } catch (exception) {
       setErrorMessage('wrong credentials')
       setTimeout(() => {
@@ -31,45 +29,28 @@ const LoginForm = ({ loginVisible, setLoginVisible, setUser, setErrorMessage }) 
     }
   }
 
-  const handleUsernameChange = ({target}) => {
-    setUsername(target.value)
-
-  }
-
-  const handlePasswordChange = ({target}) => {
-    setPassword(target.value)
-  }
-
   return (
     <div>
-      <div style={hideWhenVisible}>
-        <button onClick={() => setLoginVisible(true)}>log in</button>
-      </div>  
-      <div style={showWhenVisible}>
+      <h2>Login</h2>
+      <form onSubmit={handleLogin}>
         <div>
-          <h2>Login</h2>
-
-          <form onSubmit={handleLogin}>
-            <div>
-              username
-              <input
-                value={username}
-                onChange={handleUsernameChange}
-              />
-            </div>
-            <div>
-              password
-              <input
-                type="password"
-                value={password}
-                onChange={handlePasswordChange}
-              />
-            </div>
-            <button type="submit">login</button>
-          </form>
+          username
+          <input
+            value={username}
+            onChange={({ target }) => setUsername(target.value)}
+          />
         </div>
-        <button onClick={() => setLoginVisible(false)}>cancel</button>
-      </div>
+        <div>
+          password
+          <input
+            type="password"
+            value={password}
+            onChange={({ target }) => setPassword(target.value)}
+          />
+        </div>
+        <button type="submit">login</button>
+      </form>
+      <button onClick={closeModal}>cancel</button>
     </div>
   )
 }

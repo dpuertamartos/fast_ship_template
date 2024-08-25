@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { Box } from '@mui/material'
-import Note from '../components/Note'
+import { Box, Typography } from '@mui/material'
+import Note from '../components/notes/Note'
 import noteService from '../services/notes'
-import Togglable from '../components/Togglable'
-import NoteForm from '../components/NoteForm'
+import Togglable from '../components/common/Togglable_template'
+import NoteForm from '../components/notes/NoteForm'
 
 const Notes = ({ setErrorMessage, user }) => {
   const [notes, setNotes] = useState([])
@@ -53,7 +53,7 @@ const Notes = ({ setErrorMessage, user }) => {
 
   return (
     <Box>
-      <h1>Notes</h1>
+      <Typography variant="h4">Notes</Typography>
 
       {user && <div>
         <Togglable buttonLabel='new note' ref={noteFormRef}>

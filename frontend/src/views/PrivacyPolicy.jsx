@@ -1,7 +1,7 @@
 import { Container, Typography, Box } from '@mui/material'
 import ContactButton from '../components/common/ContactButton'
 
-const date = "16/05/2024"
+const date = '16/05/2024'
 
 const PrivacyPolicy = () => {
   return (

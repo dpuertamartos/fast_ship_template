@@ -3,9 +3,10 @@ import { AppBar, Toolbar, Button, IconButton, Box } from '@mui/material'
 import SettingsIcon from '@mui/icons-material/Tune'
 import MenuIcon from '@mui/icons-material/Menu'
 import HomeIcon from '@mui/icons-material/Home'
+import AccountCircle from '@mui/icons-material/AccountCircle'
 import ShareMenu from './ShareMenu'
 
-const TopMenu = ({ location, linkStyle, theme, isLargeScreen, handleDrawerToggle, handleMenuToggle }) => {
+const TopMenu = ({ location, linkStyle, theme, isLargeScreen, handleDrawerToggle, handleMenuToggle, user, onLogin, onLogout }) => {
 
   const appBarStyle = {
     backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white
@@ -18,15 +19,22 @@ const TopMenu = ({ location, linkStyle, theme, isLargeScreen, handleDrawerToggle
     <>
       <AppBar position="fixed" sx={appBarStyle}>
         <Toolbar sx={{ justifyContent: 'flex-end', gap: 4 }}>
-
           <ShareMenu />
-
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
             <IconButton color={location.pathname === '/' ? 'primary' : 'inherit'} component={Link} to="/">
               <HomeIcon />
             </IconButton>
             {isLargeScreen && (
               <>
+                {user ? (
+                  <>
+                    <IconButton color={location.pathname === '/profile' ? 'primary' : 'inherit'} component={Link} to="/profile">
+                      <AccountCircle />
+                    </IconButton>
+                  </>
+                ) : (
+                  <Button color="inherit" sx={{ ...linkStyle, color: 'inherit' }} onClick={onLogin}>LOGIN</Button>
+                )}
                 <Button component={Link} to="/notes" sx={{ ...linkStyle, color: location.pathname.startsWith('/notes') ? theme.palette.primary.main : 'inherit' }}>NOTES</Button>
                 <Button component={Link} to="/contact" sx={{ ...linkStyle, color: location.pathname === '/contact' ? theme.palette.primary.main : 'inherit' }}>INFO</Button>
               </>
@@ -44,7 +52,7 @@ const TopMenu = ({ location, linkStyle, theme, isLargeScreen, handleDrawerToggle
           )}
           {!isLargeScreen && (
             <IconButton
-              color={location.pathname !== '/' ? 'primary' : 'inherit'} // Change color if not on home route
+              color={location.pathname !== '/' ? 'primary' : 'inherit'}
               aria-label="open menu"
               edge="start"
               onClick={handleMenuToggle}
