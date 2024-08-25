@@ -6,7 +6,7 @@ const Profile = ({ user, onLogout }) => {
   return (
     <Box>
       <Typography variant="h4">Profile</Typography>
-      <Typography variant="body1">Username: {user.name}</Typography>
+      <Typography variant="body1">Username: {user.username}</Typography>
       <Button onClick={onLogout}>LOGOUT</Button>
     </Box>
   )
