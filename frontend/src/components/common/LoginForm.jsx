@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { TextField, Button, Typography } from '@mui/material' // Import Material-UI components
+import { TextField, Button, Typography, IconButton, Box } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import loginService from '../../services/login'
 import noteService from '../../services/notes'
-import userService from '../../services/users' // Import userService
+import userService from '../../services/users'
 import Notification from './Notification'
 
 const LoginForm = ({ setUser, closeModal }) => {
@@ -77,9 +78,21 @@ const LoginForm = ({ setUser, closeModal }) => {
   }
 
   return (
-    <div>
-      <Notification message={message.message} className={message.type} />
-      <Typography variant="h5">{isRegistering ? 'Register' : 'Login'}</Typography>
+    <Box sx={{ position: 'relative' }}>
+      <IconButton
+        aria-label="close"
+        onClick={closeModal}
+        sx={{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          color: (theme) => theme.palette.grey[500],
+        }}
+      >
+        <CloseIcon />
+      </IconButton>
+      <Notification message={message.message} severity={message.type} />
+      <Typography variant="h5" sx={{ textAlign: 'center', mb: 2 }}>{isRegistering ? 'Register' : 'Login'}</Typography>
       <form onSubmit={isRegistering ? handleRegister : (e) => { e.preventDefault(); handleLogin({ username, password }) }}>
         <TextField
           label="Username"
@@ -96,17 +109,19 @@ const LoginForm = ({ setUser, closeModal }) => {
           fullWidth
           margin="normal"
         />
-        <Button type="submit" variant="contained" color="primary" fullWidth>
+        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
           {isRegistering ? 'Register' : 'Login'}
         </Button>
       </form>
-      <Button onClick={closeModal} color="secondary" fullWidth>
-        Cancel
+      <Button
+        onClick={() => setIsRegistering(!isRegistering)}
+        color="primary"
+        fullWidth
+        sx={{ mt: 2, textTransform: 'none', fontWeight: 'bold' }}
+      >
+        {isRegistering ? 'Already have an account? Log in' : "Don't have an account? Register"}
       </Button>
-      <Button onClick={() => setIsRegistering(!isRegistering)} color="primary" fullWidth>
-        {isRegistering ? 'Switch to Login' : 'Switch to Register'}
-      </Button>
-    </div>
+    </Box>
   )
 }
 

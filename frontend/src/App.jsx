@@ -95,19 +95,16 @@ const App = () => {
           transform: 'translate(-50%, -50%)',
           width: 400,
           bgcolor: 'background.paper',
-          border: '2px solid #000',
+          borderRadius: 2,
           boxShadow: 24,
           p: 4,
-          borderRadius: 2,
-          outline: 'none'
+          outline: 'none',
         }}>
-          <LoginForm setUser={setUser} setErrorMessage={setErrorMessage} closeModal={handleLoginClose} />
+          <LoginForm setUser={setUser} closeModal={handleLoginClose} />
         </Box>
       </Modal>
 
-      <Box>
-        <Notification message={errorMessage} />
-      </Box>
+      <Notification message={errorMessage} />
 
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
