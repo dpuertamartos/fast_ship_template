@@ -1,6 +1,5 @@
 ### Things to add
 
-1. Changing username to email with validation
 2. Improve aesthetic of drawer for small screens
 3. Add settings drawer example in notes
 4. Postgres database support for backend
