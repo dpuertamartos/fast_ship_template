@@ -7,23 +7,58 @@ import userService from '../../services/users'
 import Notification from './Notification'
 
 const LoginForm = ({ setUser, closeModal }) => {
-  const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [message, setMessage] = useState({
     type: 'success',
     message: null
   })
+  const [emailError, setEmailError] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [isFormValid, setIsFormValid] = useState(false)
+
+  const handleEmailChange = (event) => {
+    const emailValue = event.target.value
+    setEmail(emailValue)
+
+    if (!/.+@.+\..+/.test(emailValue)) {
+      setEmailError('Please enter a valid email address')
+      setIsFormValid(false)
+    } else {
+      setEmailError('')
+      validateForm(emailValue, password)
+    }
+  }
+
+  const handlePasswordChange = (event) => {
+    const passwordValue = event.target.value
+    setPassword(passwordValue)
+
+    if (passwordValue.trim().length === 0) {
+      setPasswordError('Password cannot be empty')
+      setIsFormValid(false)
+    } else {
+      setPasswordError('')
+      validateForm(email, passwordValue)
+    }
+  }
+
+  const validateForm = (email, password) => {
+    if (/.+@.+\..+/.test(email) && password.trim().length > 0) {
+      setIsFormValid(true)
+    } else {
+      setIsFormValid(false)
+    }
+  }
 
   const handleLogin = async (credentials) => {
     try {
       const user = await loginService.login(credentials)
-      window.localStorage.setItem(
-        'loggedAppUser', JSON.stringify(user)
-      )
+      window.localStorage.setItem('loggedAppUser', JSON.stringify(user))
       noteService.setToken(user.token)
       setUser(user)
-      setUsername('')
+      setEmail('')
       setPassword('')
       setMessage({
         type: 'success',
@@ -54,7 +89,7 @@ const LoginForm = ({ setUser, closeModal }) => {
     event.preventDefault()
     try {
       const newUser = await userService.register({
-        username,
+        email,
         password
       })
 
@@ -62,7 +97,7 @@ const LoginForm = ({ setUser, closeModal }) => {
         type: 'success',
         message: 'Registration successful.'
       })
-      await handleLogin({ username, password })
+      await handleLogin({ email, password })
     } catch (exception) {
       setMessage({
         type: 'error',
@@ -93,11 +128,13 @@ const LoginForm = ({ setUser, closeModal }) => {
       </IconButton>
       <Notification message={message.message} severity={message.type} />
       <Typography variant="h5" sx={{ textAlign: 'center', mb: 2 }}>{isRegistering ? 'Register' : 'Login'}</Typography>
-      <form onSubmit={isRegistering ? handleRegister : (e) => { e.preventDefault(); handleLogin({ username, password }) }}>
+      <form onSubmit={isRegistering ? handleRegister : (e) => { e.preventDefault(); handleLogin({ email, password }) }}>
         <TextField
-          label="Username"
-          value={username}
-          onChange={({ target }) => setUsername(target.value)}
+          label="Email"
+          value={email}
+          onChange={handleEmailChange}
+          error={Boolean(emailError)}
+          helperText={emailError}
           fullWidth
           margin="normal"
         />
@@ -105,11 +142,13 @@ const LoginForm = ({ setUser, closeModal }) => {
           label="Password"
           type="password"
           value={password}
-          onChange={({ target }) => setPassword(target.value)}
+          onChange={handlePasswordChange}
+          error={Boolean(passwordError)}
+          helperText={passwordError}
           fullWidth
           margin="normal"
         />
-        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>
+        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={!isFormValid}>
           {isRegistering ? 'Register' : 'Login'}
         </Button>
       </form>
