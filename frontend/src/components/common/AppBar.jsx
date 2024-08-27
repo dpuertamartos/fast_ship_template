@@ -5,15 +5,21 @@ import MenuIcon from '@mui/icons-material/Menu'
 import HomeIcon from '@mui/icons-material/Home'
 import AccountCircle from '@mui/icons-material/AccountCircle'
 import ShareMenu from './ShareMenu'
+import menuItems from '../../config/menuConfig' // Import the menu configuration
 
-const TopMenu = ({ location, linkStyle, theme, isLargeScreen, handleDrawerToggle, handleMenuToggle, user, onLogin, onLogout }) => {
+const TopMenu = ({ location, linkStyle, theme, isLargeScreen, handleDrawerToggle, handleMenuToggle, user, onLogin }) => {
 
   const appBarStyle = {
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     color: theme.palette.text.primary,
-    boxShadow: 'none', // Removes the shadow
-    backdropFilter: 'blur(10px)', // Ensures text is legible on the transparent background
+    boxShadow: 'none',
+    backdropFilter: 'blur(10px)',
   }
+
+  // Determine if settings icon should be shown based on the current path
+  const showSettingsIcon = menuItems.some(
+    (item) => item.path === location.pathname && item.showSettingsIcon
+  )
 
   return (
     <>
@@ -24,23 +30,47 @@ const TopMenu = ({ location, linkStyle, theme, isLargeScreen, handleDrawerToggle
             <IconButton color={location.pathname === '/' ? 'primary' : 'inherit'} component={Link} to="/">
               <HomeIcon />
             </IconButton>
+
             {isLargeScreen && (
               <>
                 {user ? (
-                  <>
-                    <IconButton color={location.pathname === '/profile' ? 'primary' : 'inherit'} component={Link} to="/profile">
-                      <AccountCircle />
-                    </IconButton>
-                  </>
+                  <IconButton
+                    color={location.pathname === '/profile' ? 'primary' : 'inherit'}
+                    component={Link}
+                    to="/profile"
+                  >
+                    <AccountCircle />
+                  </IconButton>
                 ) : (
-                  <Button color="inherit" sx={{ ...linkStyle, color: 'inherit' }} onClick={onLogin}>LOGIN</Button>
+                  <Button
+                    color="inherit"
+                    sx={{ ...linkStyle, color: 'inherit' }}
+                    onClick={onLogin}
+                  >
+                    LOGIN
+                  </Button>
                 )}
-                <Button component={Link} to="/notes" sx={{ ...linkStyle, color: location.pathname.startsWith('/notes') ? theme.palette.primary.main : 'inherit' }}>NOTES</Button>
-                <Button component={Link} to="/contact" sx={{ ...linkStyle, color: location.pathname === '/contact' ? theme.palette.primary.main : 'inherit' }}>INFO</Button>
+                {/* These are the variable menu items in the menuconfig.js */}
+                {menuItems.map(
+                  (item) =>
+                    item.showInAppBar && (
+                      <Button
+                        key={item.path}
+                        component={Link}
+                        to={item.path}
+                        sx={{
+                          ...linkStyle,
+                          color: location.pathname === item.path ? theme.palette.primary.main : 'inherit',
+                        }}
+                      >
+                        {item.label.toUpperCase()}
+                      </Button>
+                    )
+                )}
               </>
             )}
           </Box>
-          {!isLargeScreen && (location.pathname === '/notes') && (
+          {!isLargeScreen && showSettingsIcon && (
             <IconButton
               color="inherit"
               aria-label="open drawer"

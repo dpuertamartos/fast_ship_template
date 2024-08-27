@@ -109,10 +109,10 @@ const App = () => {
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
           <Route path="/notes" element={<Notes theme={theme} isLargeScreen={isLargeScreen} drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} user={user} setErrorMessage={setErrorMessage}/>} />
-          <Route path="/contact" element={<Contact drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} />} />
+          <Route path="/contact" element={<Contact />} />
           <Route path="/privacy_policy" element={<PrivacyPolicy />} />
-          <Route path="/" element={<Home />} />
           <Route path="/profile" element={<Profile user={user} onLogout={handleLogout} />} />
+          <Route path="/" element={<Home />} />
         </Routes>
       </Box>
 

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Box, Drawer, List, ListItem, ListItemText, Typography, IconButton } from '@mui/material'
 import LoginIcon from '@mui/icons-material/Login'
 import LogoutIcon from '@mui/icons-material/Logout'
+import menuItems from '../../config/menuConfig' // Import the menu configuration
 
 const SmallScreenNavMenu = ({ location, theme, linkStyle, menuOpen, handleMenuToggle, user, onLogin, onLogout }) => {
   const drawerItemStyle = (path) => ({
@@ -31,12 +32,21 @@ const SmallScreenNavMenu = ({ location, theme, linkStyle, menuOpen, handleMenuTo
           <ListItem button component={Link} to="/" onClick={handleMenuToggle} sx={drawerItemStyle('/')}>
             <ListItemText primary={<Typography sx={drawerItemStyle('/')}>INICIO</Typography>} />
           </ListItem>
-          <ListItem button component={Link} to="/notes" onClick={handleMenuToggle} sx={drawerItemStyle('/notes')}>
-            <ListItemText primary={<Typography sx={drawerItemStyle('/notes')}>NOTAS</Typography>} />
-          </ListItem>
-          <ListItem button component={Link} to="/contact" onClick={handleMenuToggle} sx={drawerItemStyle('/contact')}>
-            <ListItemText primary={<Typography sx={drawerItemStyle('/contact')}>INFO</Typography>} />
-          </ListItem>
+          {menuItems.map(
+            (item) =>
+              item.showInDrawer && (
+                <ListItem
+                  key={item.path}
+                  button
+                  component={Link}
+                  to={item.path}
+                  onClick={handleMenuToggle}
+                  sx={drawerItemStyle(item.path)}
+                >
+                  <ListItemText primary={<Typography sx={drawerItemStyle(item.path)}>{item.label.toUpperCase()}</Typography>} />
+                </ListItem>
+              )
+          )}
           {user ? (
             <>
               <ListItem button component={Link} to="/profile" onClick={handleMenuToggle} sx={drawerItemStyle('/profile')}>
