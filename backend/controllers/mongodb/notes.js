@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken')
 const notesRouter = require('express').Router()
-const Note = require('../models/note')
-const User = require('../models/user')
+const Note = require('../../models/mongodb/note')
+const User = require('../../models/mongodb/user')
 
 const getTokenFrom = request => {
   const authorization = request.get('authorization')
@@ -13,7 +13,7 @@ const getTokenFrom = request => {
 
 notesRouter.get('/', async (request, response) => {
   const notes = await Note
-    .find({}).populate('user', { username: 1, name: 1 })
+    .find({}).populate('user', { email: 1 })
   response.json(notes)
 })
 
