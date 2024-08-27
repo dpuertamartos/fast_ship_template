@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+  namespace: template
+data:
+  ssl-config.conf: |
+    events { }
+    http {
+      server {
+        listen 80;
+        server_name template.es www.template.es;
+        return 301 https://$host$request_uri;
+      }
+
+      server {
+        listen 443 ssl http2;
+        server_name template.es www.template.es;
+        ssl_certificate /etc/letsencrypt/live/template.es/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/template.es/privkey.pem;
+
+        location /health {
+          return 200 'ok';
+          add_header Content-Type text/plain;
+        }
+
+        location / {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_pass http://frontend-service.template:5173;
+        }
+
+        location /api/ {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_pass http://backend-service.template:3001;
+        }
+
+        location /rate_offer {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_pass http://backend-service.template:5000;  # Ensure this line points to your Flask service
+        }
+
+        location ~ /.well-known/acme-challenge/ {
+          root /var/www/certbot;
+          allow all;
+        }
+      }
+    }
+
+  default-config.conf: |
+    events { }
+    http {
+      server {
+        listen 80;
+        server_name template.es www.template.es;
+
+        location /health {
+          return 200 'ok';
+          add_header Content-Type text/plain;
+        }
+
+        location / {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_pass http://frontend-service.template:5173;
+        }
+
+        location /api/ {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_pass http://backend-service.template:3001;
+        }
+
+        location /rate_offer {
+          proxy_http_version 1.1;
+          proxy_set_header Upgrade $http_upgrade;
+          proxy_set_header Connection 'upgrade';
+          proxy_pass http://backend-service.template:5000;  # Ensure this line points to your Flask service
+        }
+
+        location ^~ /.well-known/acme-challenge/ {
+          root /var/www/certbot;
+          allow all;
+          try_files $uri =404;
+        }
+      }
+    }

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: template
+spec:
+  type: ClusterIP
+  selector:
+    app: backend
+  ports:
+    - name: http
+      port: 3001
+      targetPort: 3001
+    - name: flask
+      port: 5000
+      targetPort: 5000

@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: template
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      volumes:
+      - name: nginx-config-volume
+        emptyDir: {}
+      - name: cert-volume
+        persistentVolumeClaim:
+          claimName: certbot-pvc
+      - name: webroot-volume
+        persistentVolumeClaim:
+          claimName: webroot
+      - name: config-map-volume
+        configMap:
+          name: nginx-config
+
+      initContainers:
+      - name: init-nginx-config
+        image: busybox
+        command: ['sh', '-c', 'if [ -f /etc/letsencrypt/live/template.es/fullchain.pem ]; then cp /config-map/ssl-config.conf /nginx-conf/nginx.conf; else cp /config-map/default-config.conf /nginx-conf/nginx.conf; fi']
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /nginx-conf
+        - name: config-map-volume
+          mountPath: /config-map
+        - name: cert-volume
+          mountPath: /etc/letsencrypt
+
+      containers:
+      - name: nginx
+        image: nginx:1.20.1
+        ports:
+        - containerPort: 80
+        - containerPort: 443
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: cert-volume
+          mountPath: /etc/letsencrypt
+        - name: webroot-volume
+          mountPath: /var/www/certbot

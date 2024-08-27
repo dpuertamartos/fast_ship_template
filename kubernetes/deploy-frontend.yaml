@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 1  # Adjust the number of replicas based on your load expectations
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: dpuertamartos/template-frontend:20240727150000-4740eb4
+        ports:
+        - containerPort: 5173  # Replace with the actual port your frontend listens on
