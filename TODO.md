@@ -1,6 +1,5 @@
 ### Things to add
 
-3. Add settings drawer example in notes
 4. Postgres database support for backend
 5. Google log in
 6. python microservice template (flask)

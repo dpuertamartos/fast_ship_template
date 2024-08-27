@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { Box, Typography } from '@mui/material'
+import { Box, Typography, Grid } from '@mui/material'
 import Note from '../components/notes/Note'
 import noteService from '../services/notes'
-import Togglable from '../components/common/Togglable_template'
+import Togglable from '../components/common/Togglable'
 import NoteForm from '../components/notes/NoteForm'
+import ExtraDrawer from '../components/common/ExtraDrawer'
 
-const Notes = ({ setErrorMessage, user }) => {
+const Notes = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, user, setErrorMessage }) => {
   const [notes, setNotes] = useState([])
   const [showAll, setShowAll] = useState(true)
 
@@ -53,6 +54,19 @@ const Notes = ({ setErrorMessage, user }) => {
 
   return (
     <Box>
+      <Grid>
+        {!isLargeScreen &&
+        <ExtraDrawer
+          theme={theme}
+          handleDrawerToggle={handleDrawerToggle}
+          drawerOpen={drawerOpen}
+          drawerContent={
+            <Typography variant="h6" component="div">
+            Hello Drawer!
+            </Typography>
+          }
+        />}
+      </Grid>
       <Typography variant="h4">Notes</Typography>
 
       {user && <div>
