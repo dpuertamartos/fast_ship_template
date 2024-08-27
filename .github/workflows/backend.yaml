@@ -47,7 +47,7 @@ jobs:
         context: ./backend
         file: ./backend/Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_USERNAME }}/TEMPLATE-backend:${{ env.TAG }}
+        tags: ${{ secrets.DOCKER_USERNAME }}/template-backend:${{ env.TAG }}
         platforms: linux/amd64,linux/arm64 
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache
@@ -57,10 +57,10 @@ jobs:
         git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git pull --ff-only 
-        cat kubernetes/deploy-web.yaml
-        sed -i 's|dpuertamartos/TEMPLATE-backend:[^\"]*|dpuertamartos/TEMPLATE-backend:${{ env.TAG }}|g' ./kubernetes/deploy-web.yaml
-        cat kubernetes/deploy-web.yaml 
-        git add ./kubernetes/deploy-web.yaml
+        cat kubernetes/deploy-backend.yaml
+        sed -i 's|dpuertamartos/template-backend:[^\"]*|dpuertamartos/template-backend:${{ env.TAG }}|g' ./kubernetes/deploy-backend.yaml
+        cat kubernetes/deploy-backend.yaml 
+        git add ./kubernetes/deploy-backend.yaml
         git commit -m "Update backend image tag to ${{ env.TAG }}"
         
     - name: Push changes
@@ -72,5 +72,5 @@ jobs:
     - name: Deploy to Kubernetes
       uses: steebchen/kubectl@v2.0.0
       with:
-        command: apply -f ./kubernetes/deploy-web.yaml
-        config: ${{ secrets.KUBE_CONFIG_DATA }}
+        command: apply -f ./kubernetes/deploy-backend.yaml
+        config: ${{ secrets.KUBE_CONFIG_DATA_YOUR_KUBERNETES }}
