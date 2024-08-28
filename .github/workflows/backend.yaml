@@ -58,9 +58,9 @@ jobs:
         git config --local user.name "github-actions[bot]"
         git pull --ff-only 
         cat kubernetes/deploy-backend.yaml
-        sed -i 's|dpuertamartos/template-backend:[^\"]*|dpuertamartos/template-backend:${{ env.TAG }}|g' ./kubernetes/deploy-backend.yaml
+        sed -i 's|dpuertamartos/template-backend:[^\"]*|dpuertamartos/template-backend:${{ env.TAG }}|g' ./kubernetes/common/deploy-backend.yaml
         cat kubernetes/deploy-backend.yaml 
-        git add ./kubernetes/deploy-backend.yaml
+        git add ./kubernetes/common/deploy-backend.yaml
         git commit -m "Update backend image tag to ${{ env.TAG }}"
         
     - name: Push changes
@@ -72,5 +72,5 @@ jobs:
     - name: Deploy to Kubernetes
       uses: steebchen/kubectl@v2.0.0
       with:
-        command: apply -f ./kubernetes/deploy-backend.yaml
+        command: apply -f ./kubernetes/common/deploy-backend.yaml
         config: ${{ secrets.KUBE_CONFIG_DATA_YOUR_KUBERNETES }}
