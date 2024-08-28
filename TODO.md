@@ -1,6 +1,5 @@
 ### Things to add
 
-1. python microservice template (flask)
-2. kubernetes for python microservice
-3. github actions yaml pipeline finalization for python microservice
-4. stripe payment branch
+1. kubernetes for python microservice
+2. test everything works as expected in kubernetes
+3. stripe payment branch
