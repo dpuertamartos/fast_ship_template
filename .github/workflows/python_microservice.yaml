@@ -56,11 +56,11 @@ jobs:
         git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
         git pull --ff-only 
-        cat kubernetes/common/deploy-backend.yaml
-        sed -i 's|dpuertamartos/template-python-microservice:[^\"]*|dpuertamartos/template-python-microservice:${{ env.TAG }}|g' ./kubernetes/common/deploy-backend.yaml
-        cat kubernetes/common/deploy-backend.yaml 
-        git add ./kubernetes/common/deploy-backend.yaml
-        git commit -m "Update backend image tag to ${{ env.TAG }}"
+        cat kubernetes/common/deploy-python-microservice.yaml
+        sed -i 's|dpuertamartos/template-python-microservice:[^\"]*|dpuertamartos/template-python-microservice:${{ env.TAG }}|g' ./kubernetes/common/deploy-python-microservice.yaml
+        cat kubernetes/common/deploy-python-microservice.yaml 
+        git add ./kubernetes/common/deploy-python-microservice.yaml
+        git commit -m "Update python-microservice image tag to ${{ env.TAG }}"
         
     - name: Push changes
       uses: ad-m/github-push-action@master
@@ -71,5 +71,5 @@ jobs:
     - name: Deploy to Kubernetes
       uses: steebchen/kubectl@v2.0.0
       with:
-        command: apply -f ./kubernetes/common/deploy-backend.yaml
+        command: apply -f ./kubernetes/common/deploy-python-microservice.yaml
         config: ${{ secrets.KUBE_CONFIG_DATA_YOUR_KUBERNETES }}
