@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-dev-deployment
+  namespace: template
+spec:
+  replicas: 1  # Usually less than production for development
+  selector:
+    matchLabels:
+      app: nginx-dev
+  template:
+    metadata:
+      labels:
+        app: nginx-dev
+    spec:
+      volumes:
+      - name: nginx-config-volume
+        configMap:
+          name: nginx-dev-config  # Development-specific ConfigMap
+      containers:
+      - name: nginx
+        image: nginx:1.20.1
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-config-volume
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf

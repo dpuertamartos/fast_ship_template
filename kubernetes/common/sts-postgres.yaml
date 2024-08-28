@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: template
+spec:
+  serviceName: "postgres"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:16
+        env:
+          - name: POSTGRES_DB
+            value: "notes"
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: postgres-user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-secret
+                key: postgres-password
+        ports:
+        - containerPort: 5432
+        volumeMounts:
+        - name: postgres-db
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config-volume
+          mountPath: /etc/postgresql/postgresql.conf
+          subPath: postgresql.conf
+        - name: postgres-initdb
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "8Gi"
+            cpu: "2"
+      volumes:
+      - name: postgres-config-volume
+        configMap:
+          name: postgres-config
+      - name: postgres-initdb
+        configMap:
+          name: postgres-initdb-config
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-db
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 20Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: template
+data:
+  postgresql.conf: |
+    max_connections = 200
+    shared_buffers = 6GB
+    work_mem = 64MB
+    maintenance_work_mem = 256MB
+    checkpoint_completion_target = 0.7
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    effective_cache_size = 12GB
+    logging_collector = on
+    log_directory = 'pg_log'
+    log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'
+    log_min_duration_statement = 2000
+    log_statement = 'all'
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-initdb-config
+  namespace: template
+data:
+  init-db.sql: |
+    CREATE DATABASE notes;
