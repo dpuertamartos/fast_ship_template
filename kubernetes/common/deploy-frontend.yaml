@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend-deployment
+  namespace: template
   labels:
     app: frontend
 spec:
@@ -16,6 +17,6 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: dpuertamartos/template-frontend:20240727150000-4740eb4
+        image: dpuertamartos/template-frontend:latest
         ports:
         - containerPort: 5173  # Replace with the actual port your frontend listens on

@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm ci --only=production --maxsockets 1
+RUN npm ci --maxsockets 1
 
 RUN npm run build
 
