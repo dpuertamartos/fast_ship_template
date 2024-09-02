@@ -1,0 +1,41 @@
+# Get all comments for a specific blog
+GET http://localhost:3001/api/comments/all/66d498de9f15ecefa0611ec0
+Content-Type: application/json
+
+###
+
+# Get a specific comment by ID
+GET http://localhost:3001/api/comments/66d4999f9f15ecefa0611ecc
+Content-Type: application/json
+
+###
+
+# Create a new comment (requires user token)
+POST http://localhost:3001/api/comments
+Authorization: Bearer aJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXJAdXNlci5jb20iLCJpZCI6IjY2ZDNhMGQ0YTgzZDQ3ZDgyOThkNzkwNCIsImlhdCI6MTcyNTIwODkyMH0.THWt8WabvdMPD5dBCVZqFh2UpUUSQsp7HJY5l1BfVfY
+Content-Type: application/json
+
+{
+  "content": "This is a new comment 2",
+  "blogId": "66d498de9f15ecefa0611ec0"
+}
+
+###
+
+# Update a comment (only by the comment's creator or an admin)
+PUT http://localhost:3001/api/comments/66d4a1bf9f15ecefa0611ee3
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXJAdXNlci5jb20iLCJpZCI6IjY2ZDNhMGQ0YTgzZDQ3ZDgyOThkNzkwNCIsImlhdCI6MTcyNTIwODkyMH0.THWt8WabvdMPD5dBCVZqFh2UpUUSQsp7HJY5l1BfVfY
+Content-Type: application/json
+
+{
+  "content": "This is the updated content of the comment."
+}
+
+###
+
+# Delete a comment (requires comment creator or admin token)
+DELETE http://localhost:3001/api/comments/{{commentId}}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InVzZXJAdXNlci5jb20iLCJpZCI6IjY2ZDNhMGQ0YTgzZDQ3ZDgyOThkNzkwNCIsImlhdCI6MTcyNTIwODkyMH0.THWt8WabvdMPD5dBCVZqFh2UpUUSQsp7HJY5l1BfVfY
+Content-Type: application/json
+
+
