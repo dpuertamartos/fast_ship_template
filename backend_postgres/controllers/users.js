@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt')
 const usersRouter = require('express').Router()
-const User = require('../../models/postgres/user')
-const Note = require('../../models/postgres/note')
+const Blog = require('../models/blog')
+const User = require('../models/user')
 
 usersRouter.post('/', async (request, response) => {
   const { email, password } = request.body
@@ -16,13 +16,14 @@ usersRouter.post('/', async (request, response) => {
   const user = await User.create({
     email,
     passwordHash,
+    role: 'user' // Assigning default role as 'user'
   })
 
   response.status(201).json(user)
 })
 
 usersRouter.get('/', async (request, response) => {
-  const users = await User.findAll({ include: { model: Note, attributes: ['content', 'important'] } })
+  const users = await User.findAll({ include: { model: Blog, attributes: ['title', 'content'] } })
   response.json(users)
 })
 

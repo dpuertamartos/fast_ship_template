@@ -1,0 +1,42 @@
+# Get all blogs
+GET http://localhost:3001/api/blogs
+Content-Type: application/json
+
+###
+
+# Get a specific blog by ID
+GET http://localhost:3001/api/blogs/2
+Content-Type: application/json
+
+###
+
+# Create a new blog (requires admin token)
+POST http://localhost:3001/api/blogs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlkIjoxLCJpYXQiOjE3MjUzMDIxNTIsImV4cCI6MTcyNTMxNjU1Mn0.8VKfhsw5dWyjvZvs1-0dzNc-jErTBSLcelEulHCzV0c
+Content-Type: application/json
+
+{
+  "title": "New Blog Title",
+  "content": "This is the content of the new blog post.",
+  "author": "Author Name"
+}
+
+###
+
+# Update a blog (requires admin token)
+PUT http://localhost:3001/api/blogs/2
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInJvbGUiOiJhZG1pbiIsImlkIjoxLCJpYXQiOjE3MjUzMDIxNTIsImV4cCI6MTcyNTMxNjU1Mn0.8VKfhsw5dWyjvZvs1-0dzNc-jErTBSLcelEulHCzV0c
+Content-Type: application/json
+
+{
+  "title": "Updated Blog Title",
+  "content": "Updated content of the blog post.",
+  "author": "Updated Author Name"
+}
+
+###
+
+# Delete a blog (requires admin token)
+DELETE http://localhost:3001/api/blogs/66d498de9f15ecefa0611ec0
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsImlkIjoiNjZkM2E1ZTk0NDQzYThmYzliYjY3YjM0IiwiaWF0IjoxNzI1MTQ2NjE3fQ.q5x1ChjjybR9Chxyo-lurvDiZZuUiLEZrnL0i1Ajcps
+Content-Type: application/json

@@ -1,17 +1,15 @@
 const logger = require('./logger')
 
 const requestLogger = (request, response, next) => {
-  // Create a copy of the request body to avoid directly modifying it
   const sanitizedBody = { ...request.body }
 
-  // Remove the password or any other sensitive information
   if (sanitizedBody.password) {
     sanitizedBody.password = '***'
   }
 
   logger.info('Method:', request.method)
   logger.info('Path:  ', request.path)
-  logger.info('Body:  ', sanitizedBody)  // Log sanitized body
+  logger.info('Body:  ', sanitizedBody)
   logger.info('---')
   next()
 }
@@ -27,10 +25,10 @@ const errorHandler = (error, request, response, next) => {
     return response.status(400).send({ error: 'malformatted id' })
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
-  } else if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
-    return response.status(400).json({ error: 'expected `username` to be unique' })
   } else if (error.name === 'JsonWebTokenError') {
-    return response.status(400).json({ error: 'token missing or invalid' })
+    return response.status(401).json({ error: 'token missing or invalid' })  // Update this to 401
+  } else if (error.name === 'TokenExpiredError') { // Handle expired token
+    return response.status(401).json({ error: 'token expired' })  // Respond with 401 if the token has expired
   }
 
   next(error)
