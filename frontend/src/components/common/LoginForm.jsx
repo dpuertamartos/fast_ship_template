@@ -1,12 +1,12 @@
+// src/components/common/LoginForm.jsx
 import { useState } from 'react'
 import { TextField, Button, Typography, IconButton, Box } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
-import loginService from '../../services/login'
-import noteService from '../../services/notes'
+import { useAuth } from '../../context/AuthContext' // Import useAuth from context
 import userService from '../../services/users'
 import Notification from './Notification'
 
-const LoginForm = ({ setUser, closeModal }) => {
+const LoginForm = ({ closeModal }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
@@ -17,6 +17,8 @@ const LoginForm = ({ setUser, closeModal }) => {
   const [emailError, setEmailError] = useState('')
   const [passwordError, setPasswordError] = useState('')
   const [isFormValid, setIsFormValid] = useState(false)
+
+  const { login } = useAuth()  // Use login method from AuthContext
 
   const handleEmailChange = (event) => {
     const emailValue = event.target.value
@@ -54,10 +56,7 @@ const LoginForm = ({ setUser, closeModal }) => {
 
   const handleLogin = async (credentials) => {
     try {
-      const user = await loginService.login(credentials)
-      window.localStorage.setItem('loggedAppUser', JSON.stringify(user))
-      noteService.setToken(user.token)
-      setUser(user)
+      await login(credentials)  // Use login method from context
       setEmail('')
       setPassword('')
       setMessage({
@@ -97,7 +96,7 @@ const LoginForm = ({ setUser, closeModal }) => {
         type: 'success',
         message: 'Registration successful.'
       })
-      await handleLogin({ email, password })
+      await handleLogin({ email, password }) // Log in after successful registration
     } catch (exception) {
       setMessage({
         type: 'error',

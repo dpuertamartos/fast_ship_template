@@ -2,24 +2,22 @@ import { useState, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { CssBaseline, useTheme, useMediaQuery, Box, Modal } from '@mui/material'
 import Footer from './components/common/Footer'
-import noteService from './services/notes'
 import LoginForm from './components/common/LoginForm'
 import Notification from './components/common/Notification'
 import Contact from './views/Contact'
 import Profile from './views/Profile'
 import PrivacyPolicy from './views/PrivacyPolicy'
 import Home from './views/Home'
-import Notes from './views/Notes'
 import SmallScreenNavMenu from './components/common/DrawerSmallScreenNavigation'
 import TopMenu from './components/common/AppBar'
+import { useAuth } from './context/AuthContext' // Import useAuth
 
 const App = () => {
   const [errorMessage, setErrorMessage] = useState(null)
-  const [user, setUser] = useState(null)
-  const [loginVisible, setLoginVisible] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const { user, logout, loginVisible, setLoginVisible } = useAuth() // Use the new context values
   const theme = useTheme()
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'))
   const location = useLocation()
@@ -28,35 +26,11 @@ const App = () => {
     window.scrollTo(0, 0)
   }, [location])
 
-  useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedAppUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      noteService.setToken(user.token)
-    }
-  }, [])
+  const handleDrawerToggle = () => setDrawerOpen(!drawerOpen)
+  const handleMenuToggle = () => setMenuOpen(!menuOpen)
 
-  const handleDrawerToggle = () => {
-    setDrawerOpen(!drawerOpen)
-  }
-
-  const handleMenuToggle = () => {
-    setMenuOpen(!menuOpen)
-  }
-
-  const handleLoginOpen = () => {
-    setLoginVisible(true)
-  }
-
-  const handleLoginClose = () => {
-    setLoginVisible(false)
-  }
-
-  const handleLogout = () => {
-    window.localStorage.removeItem('loggedAppUser')
-    setUser(null)
-  }
+  const handleLoginOpen = () => setLoginVisible(true)
+  const handleLoginClose = () => setLoginVisible(false)
 
   const linkStyle = {
     fontWeight: 600,
@@ -84,7 +58,7 @@ const App = () => {
         handleMenuToggle={handleMenuToggle}
         user={user}
         onLogin={handleLoginOpen}
-        onLogout={handleLogout}
+        onLogout={logout} // Use logout from context
       />
 
       <Modal open={loginVisible} onClose={handleLoginClose}>
@@ -100,7 +74,7 @@ const App = () => {
           p: 4,
           outline: 'none',
         }}>
-          <LoginForm setUser={setUser} closeModal={handleLoginClose} />
+          <LoginForm closeModal={handleLoginClose} />
         </Box>
       </Modal>
 
@@ -108,15 +82,14 @@ const App = () => {
 
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
-          <Route path="/notes" element={<Notes theme={theme} isLargeScreen={isLargeScreen} drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} user={user} setErrorMessage={setErrorMessage}/>} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy_policy" element={<PrivacyPolicy />} />
-          <Route path="/profile" element={<Profile user={user} onLogout={handleLogout} />} />
-          <Route path="/" element={<Home />} />
+          <Route path="/profile" element={<Profile user={user} onLogout={logout} />} />
+          <Route path="/" element={<Home theme={theme} isLargeScreen={isLargeScreen} drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} setErrorMessage={setErrorMessage}/>} />
         </Routes>
       </Box>
 
-      <SmallScreenNavMenu linkStyle={linkStyle} location={location} theme={theme} menuOpen={menuOpen} handleMenuToggle={handleMenuToggle} user={user} onLogin={handleLoginOpen} onLogout={handleLogout}/>
+      <SmallScreenNavMenu linkStyle={linkStyle} location={location} theme={theme} menuOpen={menuOpen} handleMenuToggle={handleMenuToggle} user={user} onLogin={handleLoginOpen} onLogout={logout} />
 
       <Footer />
     </Box>

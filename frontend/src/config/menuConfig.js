@@ -2,11 +2,11 @@
 
 const menuItems = [
   {
-    label: 'Notes',
-    path: '/notes',
-    showInAppBar: true,
-    showInDrawer: true,
-    showSettingsIcon: true, 
+    label: 'Home',
+    path: '/',
+    showInAppBar: false,
+    showInDrawer: false,
+    showSettingsIcon: true,
   },
   {
     label: 'Contact',
