@@ -14,7 +14,15 @@ const getTokenFrom = request => {
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({})
     .populate('user', { email: 1 })
-    .populate('comments', { content: 1, date: 1 })
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        select: 'email', // Ensure both email and _id are fetched
+      },
+      select: 'content date user',
+    })
+
   response.json(blogs)
 })
 
@@ -22,7 +30,14 @@ blogsRouter.get('/', async (request, response) => {
 blogsRouter.get('/:id', async (request, response) => {
   const blog = await Blog.findById(request.params.id)
     .populate('user', { email: 1 })
-    .populate('comments', { content: 1, date: 1, user: 1 })
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        select: 'email', // Ensure both email and _id are fetched
+      },
+      select: 'content date user',
+    })
 
   if (blog) {
     response.json(blog)
@@ -30,6 +45,7 @@ blogsRouter.get('/:id', async (request, response) => {
     response.status(404).json({ error: 'blog not found' })
   }
 })
+
 
 blogsRouter.post('/', async (request, response) => {
   const body = request.body

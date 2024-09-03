@@ -12,7 +12,9 @@ const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMe
   const [newBlog, setNewBlog] = useState({ title: '', content: '', author: '' })
   const [newComment, setNewComment] = useState('')
   const [editingBlog, setEditingBlog] = useState(null) // State for editing a blog
-  const [editModalOpen, setEditModalOpen] = useState(false) // State for modal open/close
+  const [editingComment, setEditingComment] = useState(null) // State for editing a comment
+  const [editModalOpen, setEditModalOpen] = useState(false) // State for blog edit modal open/close
+  const [editCommentModalOpen, setEditCommentModalOpen] = useState(false) // State for comment edit modal open/close
 
   useEffect(() => {
     blogService.getAll().then(initialBlogs => setBlogs(initialBlogs))
@@ -28,6 +30,11 @@ const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMe
   const handleEditChange = (event) => {
     const { name, value } = event.target
     setEditingBlog({ ...editingBlog, [name]: value })
+  }
+
+  const handleCommentEditChange = (event) => {
+    const { value } = event.target
+    setEditingComment({ ...editingComment, content: value })
   }
 
   const addBlog = async (event) => {
@@ -48,7 +55,11 @@ const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMe
   const addComment = async (blogId) => {
     try {
       const savedComment = await commentService.create({ content: newComment, blogId })
-      setBlogs(blogs.map(blog => blog.id === blogId ? { ...blog, comments: blog.comments.concat(savedComment) } : blog))
+
+      // Fetch the updated blog data from the server
+      const updatedBlog = await blogService.get(blogId)
+
+      setBlogs(blogs.map(blog => blog.id === blogId ? updatedBlog : blog))
       setNewComment('')
     } catch (error) {
       console.error('Failed to add comment', error)
@@ -98,10 +109,61 @@ const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMe
     }
   }
 
+  const handleDeleteComment = async (blogId, commentId) => {
+    if (window.confirm('Are you sure you want to delete this comment?')) {
+      try {
+        await commentService.remove(commentId)
+        setBlogs(blogs.map(blog =>
+          blog.id === blogId ? { ...blog, comments: blog.comments.filter(comment => comment.id !== commentId) } : blog
+        ))
+      } catch (error) {
+        console.error('Failed to delete comment', error)
+        setErrorMessage('Failed to delete comment')
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      }
+    }
+  }
+
+  const handleEditComment = (blogId, comment) => {
+    setEditingComment({ ...comment, blogId }) // Include blogId in the editingComment state
+    setEditCommentModalOpen(true)
+  }
+
+  const handleUpdateComment = async (event) => {
+    event.preventDefault()
+    try {
+      const updatedComment = await commentService.update(editingComment.id, {
+        content: editingComment.content,
+      })
+
+      // Fetch the updated blog data from the server using the correct blogId
+      const updatedBlog = await blogService.get(editingComment.blogId)
+
+      setBlogs(blogs.map(blog => blog.id === updatedBlog.id ? updatedBlog : blog))
+      setEditCommentModalOpen(false)
+    } catch (error) {
+      console.error('Failed to update comment', error)
+      setErrorMessage('Failed to update comment')
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
+
   const handleCloseEditModal = () => {
     setEditModalOpen(false)
     setEditingBlog(null)
   }
+
+  const handleCloseEditCommentModal = () => {
+    setEditCommentModalOpen(false)
+    setEditingComment(null)
+  }
+
+  console.log(blogs)
 
   return (
     <Box>
@@ -140,6 +202,13 @@ const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMe
           {blog.comments.map(comment => (
             <Box key={comment.id} ml={2}>
               <Typography variant="body2">{comment.content}</Typography>
+              <Typography variant="caption">By {comment.user.email}</Typography>
+              {(user && (user.role === 'admin' || comment.user.email === user.email)) && (
+                <Box mt={1}>
+                  <Button variant="outlined" color="primary" onClick={() => handleEditComment(blog.id, comment)}>Edit</Button>
+                  <Button variant="outlined" color="secondary" onClick={() => handleDeleteComment(blog.id, comment.id)}>Delete</Button>
+                </Box>
+              )}
             </Box>
           ))}
           {user && (
@@ -182,6 +251,37 @@ const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMe
               <TextField label="Title" name="title" value={editingBlog.title} onChange={handleEditChange} fullWidth margin="normal" />
               <TextField label="Content" name="content" value={editingBlog.content} onChange={handleEditChange} fullWidth multiline rows={4} margin="normal" />
               <TextField label="Author" name="author" value={editingBlog.author} onChange={handleEditChange} fullWidth margin="normal" />
+              <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>Save Changes</Button>
+            </form>
+          </Box>
+        </Modal>
+      )}
+
+      {/* Modal for editing a comment */}
+      {editingComment && (
+        <Modal open={editCommentModalOpen} onClose={handleCloseEditCommentModal}>
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+            outline: 'none',
+          }}>
+            <Typography variant="h6" mb={2}>Edit Comment</Typography>
+            <form onSubmit={handleUpdateComment}>
+              <TextField
+                label="Content"
+                name="content"
+                value={editingComment.content}
+                onChange={handleCommentEditChange}
+                fullWidth
+                margin="normal"
+              />
               <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>Save Changes</Button>
             </form>
           </Box>

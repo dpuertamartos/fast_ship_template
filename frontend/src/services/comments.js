@@ -5,4 +5,14 @@ const create = async (newObject) => {
   return response.data
 }
 
-export default { create }
+const update = async (id, updatedObject) => {
+  const response = await axiosInstance.put(`/comments/${id}`, updatedObject)
+  return response.data
+}
+
+const remove = async (id) => {
+  const response = await axiosInstance.delete(`/comments/${id}`)
+  return response.data
+}
+
+export default { create, update, remove }

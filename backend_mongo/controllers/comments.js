@@ -107,7 +107,7 @@ commentsRouter.delete('/:id', async (request, response) => {
     return response.status(403).json({ error: 'only the creator or an admin can delete comments' })
   }
 
-  await commentToDelete.remove()
+  await Comment.deleteOne({ _id: commentToDelete._id })
   response.status(204).end()
 })
 
