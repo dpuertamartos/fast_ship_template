@@ -105,7 +105,7 @@ blogsRouter.delete('/:id', async (request, response) => {
     return response.status(404).json({ error: 'blog not found' })
   }
 
-  await blogToDelete.remove()
+  await Blog.deleteOne({ _id: blogToDelete._id })
   response.status(204).end()
 })
 

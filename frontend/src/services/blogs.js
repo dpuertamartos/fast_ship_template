@@ -11,4 +11,14 @@ const create = async (newObject) => {
   return response.data
 }
 
-export default { getAll, create }
+const remove = async (id) => {
+  const response = await axiosInstance.delete(`/blogs/${id}`)
+  return response.data
+}
+
+const update = async (id, updatedObject) => {
+  const response = await axiosInstance.put(`/blogs/${id}`, updatedObject)
+  return response.data
+}
+
+export default { getAll, create, remove, update }
