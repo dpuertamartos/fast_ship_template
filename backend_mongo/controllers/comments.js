@@ -44,12 +44,18 @@ commentsRouter.post('/', async (request, response) => {
   blog.comments = blog.comments.concat(savedComment._id)
   await blog.save()
 
-  response.status(201).json(savedComment)
+  const populatedComment = await savedComment.populate('user', 'email')
+  response.status(201).json(populatedComment)
 })
 
 // Get all comments for a specific blog
 commentsRouter.get('/all/:blogId', async (request, response) => {
-  const blog = await Blog.findById(request.params.blogId).populate('comments', { content: 1, date: 1, user: 1 })
+  const blog = await Blog.findById(request.params.blogId)
+    .populate({
+      path: 'comments',
+      select: 'content date user',
+      populate: { path: 'user', select: 'email' }, // Populate user with email
+    })
 
   if (blog) {
     response.json(blog.comments)
@@ -82,7 +88,7 @@ commentsRouter.put('/:id', async (request, response) => {
     request.params.id,
     { content: request.body.content },
     { new: true, runValidators: true, context: 'query' }
-  )
+  ).populate('user', { email: 1 })
 
   response.json(updatedComment)
 })
