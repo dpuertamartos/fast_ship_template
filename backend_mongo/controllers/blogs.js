@@ -92,8 +92,16 @@ blogsRouter.put('/:id', async (request, response) => {
   const updatedBlog = await Blog.findByIdAndUpdate(
     request.params.id,
     { title, content, author },
-    { new: true, runValidators: true, context: 'query' }
-  )
+    { new: true, runValidators: true, context: 'query' })
+    .populate('user', { email: 1 })
+    .populate({
+      path: 'comments',
+      populate: {
+        path: 'user',
+        select: 'email', // Ensure both email and _id are fetched
+      },
+      select: 'content date user',
+    })
 
   if (updatedBlog) {
     response.json(updatedBlog)
