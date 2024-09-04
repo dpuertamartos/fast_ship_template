@@ -109,7 +109,7 @@ commentsRouter.put('/:id', async (request, response) => {
     id: comment.id,
     content: comment.content,
     date: comment.date,
-    userId: comment.userId,
+    user: user ? { id: user.id, email: user.email } : null,
     blogId: comment.blogId
   }
 
