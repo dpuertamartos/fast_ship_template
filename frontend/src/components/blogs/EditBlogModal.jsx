@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Box, Modal, Typography, TextField, Button } from '@mui/material'
 import blogService from '../../services/blogs'
 
-const EditBlogModal = ({ open, blog, setBlogs, setErrorMessage, onClose }) => {
+const EditBlogModal = ({ open, blog, setBlogs, setNotification, onClose }) => {
   const [editingBlog, setEditingBlog] = useState(blog)
 
   useEffect(() => {
@@ -30,9 +30,9 @@ const EditBlogModal = ({ open, blog, setBlogs, setErrorMessage, onClose }) => {
       }
     } catch (error) {
       console.error('Failed to update blog post', error)
-      setErrorMessage('Failed to update blog post')
+      setNotification('Failed to update blog post', 'error')
       setTimeout(() => {
-        setErrorMessage(null)
+        setNotification(null)
       }, 5000)
     }
   }

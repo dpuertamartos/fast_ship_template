@@ -2,7 +2,7 @@ import { Box, Typography } from '@mui/material'
 import BlogList from '../components/blogs/BlogList'
 import ExtraDrawer from '../components/common/ExtraDrawer'
 
-const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMessage }) => {
+const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setNotification }) => {
   return (
     <Box>
       {!isLargeScreen && (
@@ -13,7 +13,7 @@ const Home = ({ theme, isLargeScreen, handleDrawerToggle, drawerOpen, setErrorMe
           drawerContent={<Typography variant="h6">Hello Drawer!</Typography>}
         />
       )}
-      <BlogList setErrorMessage={setErrorMessage} />
+      <BlogList setNotification={setNotification} />
     </Box>
   )
 }

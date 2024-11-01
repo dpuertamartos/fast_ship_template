@@ -4,7 +4,7 @@ import EditCommentModal from './EditCommentModal'
 import commentService from '../../services/comments'
 import AddComment from './AddComment'
 
-const CommentList = ({ blog, user, setErrorMessage }) => {
+const CommentList = ({ blog, user, setNotification }) => {
   const [comments, setComments] = useState([]) // Local state for comments
   const [newComment, setNewComment] = useState('')
   const [editCommentModalOpen, setEditCommentModalOpen] = useState(false)
@@ -16,10 +16,7 @@ const CommentList = ({ blog, user, setErrorMessage }) => {
       setComments(fetchedComments)
     } catch (error) {
       console.error('Failed to fetch comments', error)
-      setErrorMessage('Failed to fetch comments')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      setNotification('Failed to fetch comments', 'error')
     }
   }
 
@@ -34,10 +31,7 @@ const CommentList = ({ blog, user, setErrorMessage }) => {
       setNewComment('')
     } catch (error) {
       console.error('Failed to add comment', error)
-      setErrorMessage('Failed to add comment')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      setNotification('Failed to add comment', 'error')
     }
   }
 
@@ -57,10 +51,7 @@ const CommentList = ({ blog, user, setErrorMessage }) => {
       setEditCommentModalOpen(false)
     } catch (error) {
       console.error('Failed to update comment', error)
-      setErrorMessage('Failed to update comment')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      setNotification('Failed to update comment', 'error')
     }
   }
 
@@ -71,10 +62,7 @@ const CommentList = ({ blog, user, setErrorMessage }) => {
         setComments((prevComments) => prevComments.filter((comment) => comment.id !== commentId))
       } catch (error) {
         console.error('Failed to delete comment', error)
-        setErrorMessage('Failed to delete comment')
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
+        setNotification('Failed to delete comment', 'error')
       }
     }
   }

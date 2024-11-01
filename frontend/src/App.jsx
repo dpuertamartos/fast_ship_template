@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { CssBaseline, useTheme, useMediaQuery, Box, Modal } from '@mui/material'
 import Footer from './components/common/Footer'
 import LoginForm from './components/common/LoginForm'
-import Notification from './components/common/Notification'
+import NotificationWithContext from './components/common/NotificationWithContext'
 import Contact from './views/Contact'
 import Profile from './views/Profile'
 import PrivacyPolicy from './views/PrivacyPolicy'
@@ -11,13 +11,14 @@ import Home from './views/Home'
 import SmallScreenNavMenu from './components/common/DrawerSmallScreenNavigation'
 import TopMenu from './components/common/AppBar'
 import { useAuth } from './context/AuthContext' // Import useAuth
+import { useNotification } from './context/NotificationContext'
 
 const App = () => {
-  const [errorMessage, setErrorMessage] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
 
   const { user, logout, loginVisible, setLoginVisible } = useAuth() // Use the new context values
+  const { showNotification } = useNotification()
   const theme = useTheme()
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('md'))
   const location = useLocation()
@@ -78,14 +79,14 @@ const App = () => {
         </Box>
       </Modal>
 
-      <Notification message={errorMessage} />
+      <NotificationWithContext />
 
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy_policy" element={<PrivacyPolicy />} />
           <Route path="/profile" element={<Profile user={user} onLogout={logout} />} />
-          <Route path="/" element={<Home theme={theme} isLargeScreen={isLargeScreen} drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} setErrorMessage={setErrorMessage}/>} />
+          <Route path="/" element={<Home theme={theme} isLargeScreen={isLargeScreen} drawerOpen={drawerOpen} handleDrawerToggle={handleDrawerToggle} setNotification={showNotification} />} />
         </Routes>
       </Box>
 

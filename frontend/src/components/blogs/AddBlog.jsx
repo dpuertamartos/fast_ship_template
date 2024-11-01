@@ -1,10 +1,9 @@
 import { useState, useRef } from 'react'
 import { Button, TextField } from '@mui/material'
-
 import blogService from '../../services/blogs'
 import Togglable from '../common/Togglable'
 
-const AddBlog = ({ blogs, setBlogs, setErrorMessage }) => {
+const AddBlog = ({ blogs, setBlogs, setNotification }) => {
   const [newBlog, setNewBlog] = useState({ title: '', content: '', author: '' })
   const blogFormRef = useRef()
 
@@ -16,9 +15,9 @@ const AddBlog = ({ blogs, setBlogs, setErrorMessage }) => {
       setNewBlog({ title: '', content: '', author: '' })
     } catch (error) {
       console.error('Failed to add blog', error)
-      setErrorMessage('Failed to add blog')
+      setNotification('Failed to add blog', 'error')
       setTimeout(() => {
-        setErrorMessage(null)
+        setNotification(null)
       }, 5000)
     }
   }

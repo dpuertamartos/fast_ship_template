@@ -5,7 +5,7 @@ import blogService from '../../services/blogs'
 import CommentList from '../comments/CommentList'
 import Togglable from '../common/Togglable'
 
-const Blog = ({ blog, user, setBlogs, setErrorMessage }) => {
+const Blog = ({ blog, user, setBlogs, setNotification }) => {
   const [editingBlog, setEditingBlog] = useState(null)
   const [editModalOpen, setEditModalOpen] = useState(false)
 
@@ -21,10 +21,7 @@ const Blog = ({ blog, user, setBlogs, setErrorMessage }) => {
         setBlogs((blogs) => blogs.filter((b) => b.id !== id))
       } catch (error) {
         console.error('Failed to delete blog post', error)
-        setErrorMessage('Failed to delete blog post')
-        setTimeout(() => {
-          setErrorMessage(null)
-        }, 5000)
+        setNotification('Failed to delete blog post', 'error')
       }
     }
   }
@@ -41,7 +38,7 @@ const Blog = ({ blog, user, setBlogs, setErrorMessage }) => {
         <CommentList
           blog={blog}
           user={user}
-          setErrorMessage={setErrorMessage}
+          setNotification={setNotification}
         />
       </Togglable>
 
@@ -61,7 +58,7 @@ const Blog = ({ blog, user, setBlogs, setErrorMessage }) => {
         open={editModalOpen}
         blog={editingBlog}
         setBlogs={setBlogs}
-        setErrorMessage={setErrorMessage}
+        setNotification={setNotification}
         onClose={() => setEditModalOpen(false)}
       />
     </Box>
