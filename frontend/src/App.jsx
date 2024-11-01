@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom'
 import { CssBaseline, useTheme, useMediaQuery, Box, Modal } from '@mui/material'
 import Footer from './components/common/Footer'
 import LoginForm from './components/common/LoginForm'
+import GoogleRedirectHandler from './components/common/GoogleRedirectHandler'
 import NotificationWithContext from './components/common/NotificationWithContext'
 import Contact from './views/Contact'
 import Profile from './views/Profile'
@@ -83,6 +84,7 @@ const App = () => {
 
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
+          <Route path="/auth/google/callback" element={<GoogleRedirectHandler />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/privacy_policy" element={<PrivacyPolicy />} />
           <Route path="/profile" element={<Profile user={user} onLogout={logout} />} />

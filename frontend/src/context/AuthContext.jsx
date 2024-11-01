@@ -35,8 +35,17 @@ export const AuthProvider = ({ children }) => {
     window.localStorage.removeItem('loggedAppUser')
   }
 
+  const googleLogin = async ({ code }) => {
+    const redirectUri = `${window.location.origin}/auth/google/callback`
+    console.log('Sending authorization code and redirect URI to backend:', code, redirectUri)
+    const user = await loginService.googleLogin(code, redirectUri)
+    setUser(user)
+    setToken(user.token)
+    window.localStorage.setItem('loggedAppUser', JSON.stringify(user))
+  }
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loginVisible, setLoginVisible }}>
+    <AuthContext.Provider value={{ user, login, googleLogin, logout, loginVisible, setLoginVisible }}>
       {children}
     </AuthContext.Provider>
   )

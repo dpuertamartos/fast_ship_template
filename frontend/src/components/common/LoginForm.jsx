@@ -1,5 +1,7 @@
 // src/components/common/LoginForm.jsx
 import { useState } from 'react'
+import { FcGoogle } from 'react-icons/fc'
+import { useGoogleLogin } from '@react-oauth/google'
 import { TextField, Button, Typography, IconButton, Box } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { useAuth } from '../../context/AuthContext' // Import useAuth from context
@@ -9,6 +11,7 @@ import Notification from './Notification'
 const LoginForm = ({ closeModal }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [isRegistering, setIsRegistering] = useState(false)
   const [message, setMessage] = useState({
     type: 'success',
@@ -20,35 +23,71 @@ const LoginForm = ({ closeModal }) => {
 
   const { login } = useAuth()  // Use login method from AuthContext
 
+  const googleAuthLogin = useGoogleLogin({
+    flow: 'auth-code',
+    ux_mode: 'redirect',
+    redirect_uri: `${window.location.origin}/auth/google/callback`, // Must match exactly with your registered redirect URI
+    state: window.location.pathname, // Pass the current path in the state parameter
+  })
+
   const handleEmailChange = (event) => {
-    const emailValue = event.target.value
+    const emailValue = event.target.value.trim()
     setEmail(emailValue)
 
-    if (!/.+@.+\..+/.test(emailValue)) {
-      setEmailError('Please enter a valid email address')
+    // Check if email contains spaces
+    if (/\s/.test(emailValue)) {
+      setEmailError('El email no puede contener espacios')
+      setIsFormValid(false)
+    } else if (!/.+@.+\..+/.test(emailValue)) {
+      setEmailError('Por favor introduzca un email válido')
       setIsFormValid(false)
     } else {
       setEmailError('')
-      validateForm(emailValue, password)
+      validateForm(emailValue, password, confirmPassword)
     }
   }
 
   const handlePasswordChange = (event) => {
-    const passwordValue = event.target.value
+    const passwordValue = event.target.value.trim()
     setPassword(passwordValue)
 
-    if (passwordValue.trim().length === 0) {
-      setPasswordError('Password cannot be empty')
+    // Check if password contains spaces
+    if (/\s/.test(passwordValue)) {
+      setPasswordError('La contraseña no puede contener espacios')
+      setIsFormValid(false)
+    } else if (passwordValue.length === 0) {
+      setPasswordError('La contraseña no puede estar vacía')
       setIsFormValid(false)
     } else {
       setPasswordError('')
-      validateForm(email, passwordValue)
+      validateForm(email, passwordValue, confirmPassword)
     }
   }
 
-  const validateForm = (email, password) => {
-    if (/.+@.+\..+/.test(email) && password.trim().length > 0) {
-      setIsFormValid(true)
+  const handleConfirmPasswordChange = (event) => {
+    const confirmPasswordValue = event.target.value.trim()
+    setConfirmPassword(confirmPasswordValue)
+    validateForm(email, password, confirmPasswordValue)
+  }
+
+  const validateForm = (email, password, confirmPassword) => {
+    // Check for spaces in email and password
+    const emailHasSpaces = /\s/.test(email)
+    const passwordHasSpaces = /\s/.test(password)
+
+    if (emailHasSpaces || passwordHasSpaces) {
+      setIsFormValid(false)
+      return
+    }
+
+    if (/.+@.+\..+/.test(email) && password.length > 0) {
+      if (isRegistering && password !== confirmPassword) {
+        setPasswordError('Las contraseñas no coinciden')
+        setIsFormValid(false)
+      } else {
+        setPasswordError('')
+        setIsFormValid(true)
+      }
     } else {
       setIsFormValid(false)
     }
@@ -56,12 +95,12 @@ const LoginForm = ({ closeModal }) => {
 
   const handleLogin = async (credentials) => {
     try {
-      await login(credentials)  // Use login method from context
+      await login(credentials)
       setEmail('')
       setPassword('')
       setMessage({
         type: 'success',
-        message: 'Login success!'
+        message: '¡Inicio de sesión exitoso!'
       })
       setTimeout(() => {
         setMessage({
@@ -73,7 +112,7 @@ const LoginForm = ({ closeModal }) => {
     } catch (exception) {
       setMessage({
         type: 'error',
-        message: 'Wrong credentials'
+        message: 'Credenciales incorrectas'
       })
       setTimeout(() => {
         setMessage({
@@ -86,21 +125,28 @@ const LoginForm = ({ closeModal }) => {
 
   const handleRegister = async (event) => {
     event.preventDefault()
+
+    const trimmedEmail = email.trim()
+    const trimmedPassword = password.trim()
+
     try {
       const newUser = await userService.register({
-        email,
-        password
+        email: trimmedEmail,
+        password: trimmedPassword
       })
 
       setMessage({
         type: 'success',
-        message: 'Registration successful.'
+        message: '¡Registro exitoso! Revise su email y carpeta de spam para confirmar. Inicio de sesión automático...'
       })
-      await handleLogin({ email, password }) // Log in after successful registration
+      setTimeout(async () => {
+        await handleLogin({ email: trimmedEmail, password: trimmedPassword })
+      }, 15000)
+
     } catch (exception) {
       setMessage({
         type: 'error',
-        message: 'Registration failed'
+        message: 'Registro fallido. Por favor, inténtelo de nuevo en unos segundos.'
       })
       setTimeout(() => {
         setMessage({
@@ -127,7 +173,7 @@ const LoginForm = ({ closeModal }) => {
       </IconButton>
       <Notification message={message.message} severity={message.type} />
       <Typography variant="h5" sx={{ textAlign: 'center', mb: 2 }}>{isRegistering ? 'Register' : 'Login'}</Typography>
-      <form onSubmit={isRegistering ? handleRegister : (e) => { e.preventDefault(); handleLogin({ email, password }) }}>
+      <form onSubmit={isRegistering ? handleRegister : (e) => { e.preventDefault(); handleLogin({ email: email.trim(), password: password.trim() }) }}>
         <TextField
           label="Email"
           value={email}
@@ -138,7 +184,7 @@ const LoginForm = ({ closeModal }) => {
           margin="normal"
         />
         <TextField
-          label="Password"
+          label="Contraseña"
           type="password"
           value={password}
           onChange={handlePasswordChange}
@@ -147,8 +193,43 @@ const LoginForm = ({ closeModal }) => {
           fullWidth
           margin="normal"
         />
-        <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }} disabled={!isFormValid}>
-          {isRegistering ? 'Register' : 'Login'}
+        {isRegistering && (
+          <TextField
+            label="Confirmar contraseña"
+            type="password"
+            value={confirmPassword}
+            onChange={handleConfirmPasswordChange}
+            error={Boolean(passwordError)}
+            helperText={passwordError}
+            fullWidth
+            margin="normal"
+          />
+        )}
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{
+            mt: 2,
+            '&.Mui-disabled': {
+              color: 'black',
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+            },
+          }}
+          disabled={!isFormValid}
+        >
+          {isRegistering ? 'Registrar cuenta' : 'Iniciar sesión'}
+        </Button>
+        {/* Google Login Button */}
+        <Button
+          onClick={() => googleAuthLogin()}
+          fullWidth
+          variant="outlined"
+          startIcon={<FcGoogle />}
+          sx={{ mt: 2 }}
+        >
+        Iniciar sesión con Google
         </Button>
       </form>
       <Button

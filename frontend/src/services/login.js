@@ -6,4 +6,12 @@ const login = async credentials => {
   return response.data
 }
 
-export default { login }
+const googleLogin = async (authorizationCode, redirectUri) => {
+  const response = await axios.post(`${baseUrl}/google`, {
+    code: authorizationCode,
+    redirectUri: redirectUri,
+  })
+  return response.data
+}
+
+export default { login, googleLogin }
