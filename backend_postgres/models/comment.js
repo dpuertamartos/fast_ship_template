@@ -1,5 +1,5 @@
 const { DataTypes } = require('sequelize')
-const sequelize = require('../utils/sequelize')
+const { sequelize } = require('../utils/db')
 
 const Comment = sequelize.define('Comment', {
   content: {

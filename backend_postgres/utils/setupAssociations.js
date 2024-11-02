@@ -16,4 +16,4 @@ const setupAssociations = () => {
   Comment.belongsTo(User, { foreignKey: 'userId' })
 }
 
-module.exports = setupAssociations
+module.exports = { setupAssociations }

@@ -7,10 +7,10 @@ const requestLogger = (request, response, next) => {
     sanitizedBody.password = '***'
   }
 
-  logger.info('Method:', request.method)
-  logger.info('Path:  ', request.path)
-  logger.info('Body:  ', sanitizedBody)
-  logger.info('---')
+  const bodyString = JSON.stringify(sanitizedBody, (key, value) =>
+    typeof value === 'object' && value !== null ? value : String(value)
+  )
+  logger.info(`Method: ${request.method}; Path: ${request.path}; Body: ${bodyString}`)
   next()
 }
 
@@ -34,8 +34,5 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
-module.exports = {
-  requestLogger,
-  unknownEndpoint,
-  errorHandler
-}
+
+module.exports = { requestLogger, unknownEndpoint, errorHandler }

@@ -3,17 +3,6 @@ const app = express()
 require('express-async-errors')
 const cors = require('cors')
 const middleware = require('./utils/middleware')
-const logger = require('./utils/logger')
-const sequelize = require('./utils/sequelize')
-
-sequelize.authenticate()
-  .then(() => {
-    logger.info('connected to PostgreSQL')
-  })
-  .catch((error) => {
-    logger.error('error connecting to PostgreSQL:', error.message)
-  })
-
 const blogsRouter = require('./controllers/blogs')
 const commentsRouter = require('./controllers/comments')
 const usersRouter = require('./controllers/users')
