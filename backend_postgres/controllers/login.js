@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const axios = require('axios')
 const config = require('../utils/config')
 const loginRouter = require('express').Router()
-const User = require('../models/user')
+const { User } = require('../models')
 
 const TOKEN_EXPIRATION = 4 * 60 * 60
 

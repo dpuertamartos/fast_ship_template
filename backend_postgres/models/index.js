@@ -1,6 +1,6 @@
-const Blog = require('../models/blog')
-const User = require('../models/user')
-const Comment = require('../models/comment')
+const Blog = require('./blog')
+const User = require('./user')
+const Comment = require('./comment')
 
 const setupAssociations = () => {
   // One-to-Many: User to Blog
@@ -16,4 +16,22 @@ const setupAssociations = () => {
   Comment.belongsTo(User, { foreignKey: 'userId' })
 }
 
-module.exports = { setupAssociations }
+const syncModels = async () => {
+  try {
+    await User.sync()
+    await Blog.sync()
+    await Comment.sync()
+
+    console.log('All models were synchronized successfully.')
+  } catch (error) {
+    console.error('Error synchronizing models:', error)
+  }
+}
+
+module.exports = {
+  Comment,
+  Blog,
+  User,
+  setupAssociations,
+  syncModels
+}
